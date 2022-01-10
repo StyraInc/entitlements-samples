@@ -1,0 +1,14 @@
+# This file is organized alphabetically.
+*.pyc
+*~
+.#*
+.DS_Store
+.secrets/
+.vscode/
+/build
+\#*#
+site/
+test/system/*.pyc
+/.idea/*
+!/.idea/runConfigurations
+telepresence.log
