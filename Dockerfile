@@ -47,9 +47,9 @@ RUN mkdir -p /src && \
 RUN mkdir -p /src/entitlements-samples/go-httpsample
 RUN mkdir -p /src/entitlements-samples/go-embeddedsample
 RUN mkdir -p /src/entitlements-samples/python-httpsample
-COPY python-httpsample/ /src/entitlements-samples/python-httpsample
+#COPY python-httpsample/ /src/entitlements-samples/python-httpsample
 COPY go-httpsample/ /src/entitlements-samples/go-httpsample
-COPY go-embeddedsample/ /src/entitlements-samples/go-embeddedsample
+#COPY go-embeddedsample/ /src/entitlements-samples/go-embeddedsample
 COPY entrypoint.sh /src
 COPY splitwatcher.sh /src
 
