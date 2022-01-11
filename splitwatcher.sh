@@ -19,10 +19,6 @@
 set -e
 set -u
 
-# It is important that we be in the same folder as tmux.conf, and we might have
-# been started from somewhere other than where we are installed.
-cd "$(dirname "$0")"
-
 # To avoid having a sidecar file, we pack our config with us. However, tmux
 # does not like reading it's config from file descriptors, so we can't simply
 # use process substitution or pipe it to standard in. Therefore we create a
@@ -39,7 +35,6 @@ trap "rm -f '$TMUX_CONFIG_FILE'" EXIT HUP INT QUIT PIPE TERM
 
 tmux -f "$TMUX_CONFIG_FILE" new-session -d -s monitor
 tmux new-window -d -t "=monitor" -n "overview"
-#tmux send-keys -t "=monitor:=overview" "while true ; do sleep 5; clear ; date ; echo hello there ; done" Enter
 
 # Close the initial window.
 tmux send-keys -t "+0" "exit" Enter
