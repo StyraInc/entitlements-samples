@@ -69,7 +69,7 @@ if [ "$SAMPLE_APP" = "go-httpsample" ] ; then
 	echo "DONE"
 
 	printf "launching carinfoserver... "
-	./carinfoserver --port $API_PORT --opa http://localhost:8181/v1/data/rules/allow >> /var/log/carinfoserver.log 2>&1 &
+	./carinfoserver --port $API_PORT --opa http://localhost:8181/v1/data/main/main >> /var/log/carinfoserver.log 2>&1 &
 	echo "DONE"
 
 	echo "launching interactive monitor... "

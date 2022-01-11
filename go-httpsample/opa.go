@@ -50,20 +50,20 @@ func decision(path []string, user, method string) (bool, error) {
 	defer resp.Body.Close()
 
 	// Decode the response
-	var result OPAResult
+	var decision OPADecision
 	bodyBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Println(err)
 		return false, err
 	}
-	err = json.Unmarshal(bodyBytes, &result)
+	err = json.Unmarshal(bodyBytes, &decision)
 	if err != nil {
 		log.Println(err)
 		return false, err
 	}
 
-	log.Printf("OPA decision was: %v\n", result.Result)
+	log.Printf("OPA result: allowd=%v\n", decision.Result.Allowed)
 
-	return result.Result, nil
+	return decision.Result.Allowed, nil
 
 }

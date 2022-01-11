@@ -47,8 +47,13 @@ type OPAInput struct {
 	Method string `json:"method"`
 }
 
+// OPADecision represents an entire decision from the OPA server.
+type OPADecision struct {
+	DecisionID string     `json:"decision_id"`
+	Result     *OPAResult `json:"result"`
+}
+
 // OPAResult represents a decision returned by the OPA server.
 type OPAResult struct {
-	DecisionID string `json:"decision_id"`
-	Result     bool   `json:"result"`
+	Allowed bool `json:"allowed"`
 }
