@@ -62,7 +62,7 @@ func decision(path []string, user, method string) (bool, error) {
 		return false, err
 	}
 
-	log.Printf("OPA result: allowd=%v\n", decision.Result.Allowed)
+	log.Printf("OPA result: allowed=%v\n", decision.Result.Allowed)
 
 	return decision.Result.Allowed, nil
 

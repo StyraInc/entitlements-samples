@@ -47,15 +47,14 @@ RUN mkdir -p /src && \
 RUN mkdir -p /src/entitlements-samples/go-httpsample
 RUN mkdir -p /src/entitlements-samples/go-embeddedsample
 RUN mkdir -p /src/entitlements-samples/python-httpsample
-#COPY python-httpsample/ /src/entitlements-samples/python-httpsample
+COPY python-httpsample/ /src/entitlements-samples/python-httpsample
 COPY go-httpsample/ /src/entitlements-samples/go-httpsample
 #COPY go-embeddedsample/ /src/entitlements-samples/go-embeddedsample
 COPY entrypoint.sh /src
 COPY splitwatcher.sh /src
 
 # Install the dependencies for the Python sample app.
-#RUN pip3 install -r /src/demoserver/requirements.txt
-# TODO
+RUN pip3 install -r /src/entitlements-samples/python-httpsample/requirements.txt
 
 # Compile the Go sample apps. This will implicitly pull in their dependencies.
 RUN cd /src/entitlements-samples/go-httpsample && cat go.mod && go build -o carinfoserver ./cmd/carinfoserver

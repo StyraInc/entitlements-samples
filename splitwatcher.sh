@@ -11,6 +11,8 @@
 #
 # * FORCE_PS1 - override the PS1 of the shell(s) in the tmux session.
 # * STARTDIR - set the initial CWD for the main interactive shell.
+# * INJECT_COMMANDS - inject additional commands to be run in the terminal on
+#   startup
 #
 # This guide[0] is a helpful resource for understanding what is going on here.
 #
@@ -51,6 +53,9 @@ PREFACE="alias exit='tmux kill-session -t =monitor'; clear"
 set +u
 if [ ! -z "$FORCE_PS1" ] ; then
 	PREFACE="export PS1='$FORCE_PS1'; $PREFACE"
+fi
+if [ ! -z "$INJECT_COMMANDS" ] ; then
+	PREFACE="$INJECT_COMMANDS; $PREFACE"
 fi
 set -u
 
