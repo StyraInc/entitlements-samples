@@ -6,6 +6,7 @@ import pathlib
 import logging
 import re
 import os
+import requests
 
 ##### Globals #################################################################
 api = Flask(__name__)
@@ -168,10 +169,20 @@ def get_decision(path, user, method):
     Call out to DAS to check if a particular request is permitted.
     """
 
-    api.logger.info("path='{}' user='{}' method='{}' decision={}".format(path, user, method, True))
+    if opa_url is None:
+        api.logger.info("no OPA URL provided, all requests are allowed")
+        api.logger.info("path='{}' user='{}' method='{}' decision={}".format(path, user, method, True))
+        return True
 
-    # TODO
-    return True
+    response = requests.get(opa_url, json={"path": path, "user": user, "method": method})
+    if not response.ok:
+        api.logger.error("path='{}' user='{}' method='{}' decision={} OPA reported status code {}, body: {}".format(path, user, method, False, response.status_code, response.text))
+        return False
+
+    decision = bool(response.json()["result"]["allowed"])
+
+    api.logger.info("path='{}' user='{}' method='{}' decision={}".format(path, user, method, decision))
+    return decision
 
 def response_with_decision(path, user, method, response):
     """
