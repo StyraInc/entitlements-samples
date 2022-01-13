@@ -29,7 +29,7 @@ RUN apt-get update && \
 	yes | add-apt-repository ppa:longsleep/golang-backports && \
 	apt-get update && \
 	apt-get -qq upgrade --yes && \
-	apt-get -qq --yes install build-essential curl git golang-go jq python3 python3-pip tmux vim-tiny nano
+	apt-get -qq --yes install build-essential curl git golang-go jq python3 python3-pip tmux vim-tiny nano tcpdump
 
 # We will build OPA from source rather than downloading the release binary.
 # This is done in order to provide compatibility with M1 Macs. Although the

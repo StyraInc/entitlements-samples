@@ -174,7 +174,7 @@ def get_decision(path, user, method):
         api.logger.info("path='{}' user='{}' method='{}' decision={}".format(path, user, method, True))
         return True
 
-    response = requests.get(opa_url, json={"path": path, "user": user, "method": method})
+    response = requests.post(opa_url, json={"input": {"path": path, "user": user, "method": method}})
     if not response.ok:
         api.logger.error("path='{}' user='{}' method='{}' decision={} OPA reported status code {}, body: {}".format(path, user, method, False, response.status_code, response.text))
         return False
