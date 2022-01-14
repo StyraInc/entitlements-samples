@@ -22,6 +22,9 @@ ARG DEBIAN_FRONTEND=noninteractive
 #
 # tmux is needed for splitwatcher.
 #
+# npm is needed for redoc-cli, which we need to build and serve the Swagger
+# documentation
+#
 # The other programs installed for convienience if we need to shell in to the
 # container for debugging.
 RUN apt-get update && \
@@ -29,7 +32,8 @@ RUN apt-get update && \
 	yes | add-apt-repository ppa:longsleep/golang-backports && \
 	apt-get update && \
 	apt-get -qq upgrade --yes && \
-	apt-get -qq --yes install build-essential curl git golang-go jq python3 python3-pip tmux vim-tiny nano tcpdump
+	apt-get -qq --yes install build-essential curl git golang-go jq python3 python3-pip tmux vim-tiny nano tcpdump npm && \
+	sh -c "ln -s '$(which vim.tiny)' /usr/local/bin/vim"
 
 # We will build OPA from source rather than downloading the release binary.
 # This is done in order to provide compatibility with M1 Macs. Although the
@@ -43,10 +47,19 @@ RUN mkdir -p /src && \
 	make install && \
 	cp /root/go/bin/opa /usr/local/bin/opa
 
+# Install an updated version of node. This is required to run redoc.
+RUN curl -sL https://deb.nodesource.com/setup_16.x | bash && \
+    apt-get -qq --yes install nodejs
+
+# Install redoc 
+RUN npm i -g redoc-cli
+
 # Copy in the source code for our samples, plus the entrypoint script
 RUN mkdir -p /src/entitlements-samples/go-httpsample
 RUN mkdir -p /src/entitlements-samples/go-embeddedsample
 RUN mkdir -p /src/entitlements-samples/python-httpsample
+COPY carinfostore.yml /src/entitlements-samples
+COPY welcome.txt /src/entitlements-samples
 COPY python-httpsample/ /src/entitlements-samples/python-httpsample
 COPY go-httpsample/ /src/entitlements-samples/go-httpsample
 #COPY go-embeddedsample/ /src/entitlements-samples/go-embeddedsample

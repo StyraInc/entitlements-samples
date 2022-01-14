@@ -13,6 +13,8 @@
 # * STARTDIR - set the initial CWD for the main interactive shell.
 # * INJECT_COMMANDS - inject additional commands to be run in the terminal on
 #   startup
+# * WELCOME - if defined, this file will be displayed in the interactive
+#   terminal.
 #
 # This guide[0] is a helpful resource for understanding what is going on here.
 #
@@ -32,6 +34,7 @@ set -g pane-border-status top
 set -g status off
 set-option -g destroy-unattached off
 set-option -g remain-on-exit off
+set -g mouse on
 EOF
 trap "rm -f '$TMUX_CONFIG_FILE'" EXIT HUP INT QUIT PIPE TERM
 
@@ -56,6 +59,9 @@ if [ ! -z "$FORCE_PS1" ] ; then
 fi
 if [ ! -z "$INJECT_COMMANDS" ] ; then
 	PREFACE="$INJECT_COMMANDS; $PREFACE"
+fi
+if [ -z "$WELCOME" ] ; then
+	WELCOME=/dev/null
 fi
 set -u
 
@@ -122,6 +128,6 @@ if [ ! -z "$STARTDIR" ] ; then
 fi
 set -u
 tmux send-keys -t "=monitor:=overview.$N" "$PREFACE; echo -en '\033]0;interactive shell, \"exit\" or closing any pane will close the tmux session\a'; clear" Enter
-tmux send-keys -t "=monitor:=overview.$N" "sleep 0.2 ; history -c ; clear" Enter
+tmux send-keys -t "=monitor:=overview.$N" "sleep 0.2 ; history -c ; clear ; cat '$WELCOME'" Enter
 
 tmux attach-session -t "=monitor"

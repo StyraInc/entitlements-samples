@@ -13,6 +13,7 @@ set -u
 # The following additional environment variables are significant:
 #
 # API_PORT - port on which the API server should run (default: 8123)
+# DOCS_PORT - port on which the API documentation server should run (default: 8080)
 #
 # valid sample apps are:
 #
@@ -40,11 +41,33 @@ if [ -z "$SAMPLE_APP" ] ; then
 	exit 1
 fi
 
-# Set default environment variables.
+# Set default values for optional environment variables.
 if [ -z "$API_PORT" ] ; then API_PORT=8123 ; fi
 set -e
+if [ -z "$DOCS_PORT" ] ; then DOCS_PORT=8080; fi
+set -e
+
+# Update the OAPIv3.1 spec to report the correct port.
+sed -i 's/http:\/\/localhost:8123/http:\/\/localhost:'"$API_PORT"'/g' /src/entitlements-samples/carinfostore.yml 
 
 cd /src/entitlements-samples
+
+# Serve the CarInfoStore API docs.
+printf "launching documentation server... "
+redoc-cli serve --port $DOCS_PORT ./carinfostore.yml > /var/log/redoc.log 2>&1 &
+sleep 1
+if ! ps aux | grep -v grep | grep -q redoc-cli ; then
+	echo "FAIL"
+	echo "redoc-cli is not running. Printing redoc-cli logs and exiting..."
+	echo "--------"
+	cat /var/log/redoc.log
+	exit 1
+fi
+
+
+# Insert port information into the welcome message.
+sed -i 's/API_PORT/'"$API_PORT"'/g' welcome.txt
+sed -i 's/DOCS_PORT/'"$DOCS_PORT"'/g' welcome.txt
 
 if [ "$SAMPLE_APP" = "go-httpsample" ] ; then
 	cd go-httpsample
@@ -77,6 +100,7 @@ if [ "$SAMPLE_APP" = "go-httpsample" ] ; then
 	export FORCE_PS1="sample$ "
 	export STARTDIR="/src/entitlements-samples/go-httpsample"
 	export INJECT_COMMANDS="alias curl='curl -w \"\\n\"'"
+	export WELCOME="/src/entitlements-samples/welcome.txt"
 	sh /src/splitwatcher.sh /var/log/opa-server.log /var/log/carinfoserver.log
 
 elif [ "$SAMPLE_APP" = "python-httpsample" ] ; then
@@ -110,6 +134,7 @@ elif [ "$SAMPLE_APP" = "python-httpsample" ] ; then
 	export FORCE_PS1="sample$ "
 	export STARTDIR="/src/entitlements-samples/python-httpsample"
 	export INJECT_COMMANDS="alias curl='curl -w \"\\n\"'"
+	export WELCOME="/src/entitlements-samples/welcome.txt"
 	sh /src/splitwatcher.sh /var/log/opa-server.log /var/log/carinfoserver.log
 
 else
