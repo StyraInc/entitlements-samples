@@ -4,7 +4,7 @@ The sample app API server is running at http://localhost:API_PORT
 
 You can interact with the running sample app using "curl" and "jq". You can
 view API documentation for the sample application by browsing to
-https://localhost:DOCS_PORT
+http://localhost:DOCS_PORT
 
 You can exit this session at any time with the 'exit' command or by closing any
 tmux pane. Remember that any changes you make here will be deleted when you
