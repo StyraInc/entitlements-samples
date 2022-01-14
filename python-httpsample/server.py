@@ -200,7 +200,7 @@ def response_with_decision(path, user, method, response):
     """
 
     if not get_decision(path, user, method):
-        return Response("action prohibited by OPA policy", status=403, mimetype="text/plain")
+        return Response(json.dumps({"msg": "action prohibited by OPA policy"}), status=403, mimetype="application/json")
 
     return response
 
@@ -249,10 +249,10 @@ def api_put_car_by_id(car_id):
     user = request.headers.get("user")
 
     if not validate_car_id(car_id):
-        resp = Response("invalid car ID '{}'".format(car_id), status=400, mimetype="text/plain")
+        resp = Response(json.dumps({"msg": "invalid car ID '{}'".format(car_id)}), status=400, mimetype="application/json")
 
     if not get_decision(["cars", car_id], user, "PUT"):
-        return Response("action prohibited by OPA policy", status=403, mimetype="text/plain")
+        return Response(json.dumps({"msg": "action prohibited by OPA policy"}), status=403, mimetype="application/json")
 
     cars = get_cars()
     status = 201
@@ -268,7 +268,7 @@ def api_delete_car_by_id(car_id):
     user = request.headers.get("user")
 
     if not get_decision(["cars", car_id], user, "DELETE"):
-        return Response("action prohibited by OPA policy", status=403, mimetype="text/plain")
+        return Response(json.dumps({"msg": "action prohibited by OPA policy"}), status=403, mimetype="application/json")
 
     data = read_database()
     if car_id in data["cars"]:
@@ -292,9 +292,9 @@ def api_get_car_status(car_id):
         if car_id in statuses:
             resp = Response(json.dumps(statuses[car_id]), status=200, mimetype="application/json")
         else:
-            resp = Response("no status for car with ID '{}'".format(car_id), status=404, mimetype="text/plain")
+            resp = Response(json.dumps({"msg": "no status for car with ID '{}'".format(car_id)}), status=404, mimetype="application/json")
     else:
-        resp = Response("no such car with ID '{}'".format(car_id), status=404, mimetype="text/plain")
+        resp = Response(json.dumps({"msg": "no such car with ID '{}'".format(car_id)}), status=404, mimetype="applicaiton/json")
 
     return response_with_decision(["cars", car_id, "status"], user, "GET", resp)
 
@@ -303,7 +303,7 @@ def api_put_car_status(car_id):
     user = request.headers.get("user")
 
     if not get_decision(["cars", car_id, "status"], user, "PUT"):
-        return Response("action prohibited by OPA policy", status=403, mimetype="text/plain")
+        return Response(json.dumps({"msg": "action prohibited by OPA policy"}), status=403, mimetype="application/json")
 
     cars = get_cars()
     statuses = get_statuses()
@@ -320,7 +320,7 @@ def api_put_car_status(car_id):
 
         resp = Response(None, status=200)
     else:
-        resp = Response("no such car with ID '{}'".format(car_id), status=404, mimetype="text/plain")
+        resp = Response(json.dumps({"msg": "no such car with ID '{}'".format(car_id)}), status=404, mimetype="application/json")
 
     return response_with_decision(["cars", car_id, "status"], user, "GET", resp)
 

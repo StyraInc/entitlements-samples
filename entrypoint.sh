@@ -13,7 +13,10 @@ set -u
 # The following additional environment variables are significant:
 #
 # API_PORT - port on which the API server should run (default: 8123)
-# DOCS_PORT - port on which the API documentation server should run (default: 8080)
+# DOCS_PORT - port on which the API documentation server should run (default:
+#	8080)
+# TEST - if set to any non-empty value, automatically run the API tests in the
+#	interactive console
 #
 # valid sample apps are:
 #
@@ -116,7 +119,10 @@ opa run --server --config-file=opa-conf.yaml >> /var/log/opa-server.log 2>&1 &
 echo "DONE"
 
 printf "launching $SAMPLE_APP... "
-cp /src/entitlements-samples/data.json ./
+if [ -z "$TEST" ] ; then
+	# the test scripts wants a blank database
+	cp /src/entitlements-samples/data.json ./
+fi
 sh -c "$RUN_COMMAND" >> /var/log/carinfoserver.log 2>&1 &
 echo "DONE"
 
@@ -126,6 +132,11 @@ export FORCE_PS1="sample$ "
 export STARTDIR="/src/entitlements-samples/go-httpsample"
 export INJECT_COMMANDS="alias curl='curl -w \"\\n\"'"
 export WELCOME="/src/entitlements-samples/welcome.txt"
+
+if [ ! -z "$TEST" ] ; then
+	sh -c "sleep 2 ; tmux send-keys \"python3 ../test_api.py http://localhost:$API_PORT\" Enter" &
+fi
+
 sh /src/entitlements-samples/splitwatcher.sh /var/log/opa-server.log /var/log/carinfoserver.log
 
 exit 0

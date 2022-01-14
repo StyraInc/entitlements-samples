@@ -4,7 +4,7 @@ The sample app API server is running at http://localhost:API_PORT
 
 You can interact with the running sample app using "curl" and "jq". For example try:
 
-	curl -Ss localhost:API_PORT/cars -H "user: alice"
+	curl -Ss localhost:API_PORT/cars -H "user: alice" | jq
 
 You can view API documentation for the sample application by browsing to
 http://localhost:DOCS_PORT
