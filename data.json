@@ -1,0 +1,51 @@
+{
+    "cars": {
+        "car0": {
+            "make": "Honda",
+            "model": "CRV",
+            "color": "blue",
+            "year": 2015
+        },
+        "car1": {
+            "make": "Ford",
+            "model": "Focus",
+            "color": "black",
+            "year": 2017
+        },
+        "car2": {
+            "make": "Mazda",
+            "model": "CX-30",
+            "color": "grey",
+            "year": 2019
+        },
+        "car3": {
+            "make": "Honda",
+            "model": "Civic",
+            "color": "green",
+            "year": 2009
+        },
+        "car4": {
+            "make": "Chevy",
+            "model": "Tahoe",
+            "color": "black",
+            "year": 2020
+        }
+    },
+    "statuses": {
+        "car0": {
+            "price": 15000,
+            "ready": true,
+            "sold": false
+        },
+        "car2": {
+            "price": 25000,
+            "ready": false,
+            "sold": false
+        },
+        "car3": {
+            "price": 12000,
+            "ready": false,
+            "sold": true
+        }
+    }
+}

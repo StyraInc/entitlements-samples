@@ -47,29 +47,31 @@ RUN mkdir -p /src && \
 	make install && \
 	cp /root/go/bin/opa /usr/local/bin/opa
 
-# Install an updated version of node. This is required to run redoc.
+# Install an updated version of node. This is required to run redoc. Then
+# install redoc itself.
 RUN curl -sL https://deb.nodesource.com/setup_16.x | bash && \
-    apt-get -qq --yes install nodejs
-
-# Install redoc 
-RUN npm i -g redoc-cli
+    apt-get -qq --yes install nodejs && \
+    npm i -g redoc-cli
 
 # Copy in the source code for our samples, plus the entrypoint script
-RUN mkdir -p /src/entitlements-samples/go-httpsample
-RUN mkdir -p /src/entitlements-samples/go-embeddedsample
-RUN mkdir -p /src/entitlements-samples/python-httpsample
-COPY carinfostore.yml /src/entitlements-samples
-COPY welcome.txt /src/entitlements-samples
+RUN mkdir -p /src/entitlements-samples/go-httpsample && \
+	mkdir -p /src/entitlements-samples/go-embeddedsample & \
+	mkdir -p /src/entitlements-samples/python-httpsample
+COPY carinfostore.yml \
+	welcome.txt \
+	entrypoint.sh \
+	splitwatcher.sh \
+	data.json \
+	/src/entitlements-samples
 COPY python-httpsample/ /src/entitlements-samples/python-httpsample
 COPY go-httpsample/ /src/entitlements-samples/go-httpsample
 #COPY go-embeddedsample/ /src/entitlements-samples/go-embeddedsample
-COPY entrypoint.sh /src
-COPY splitwatcher.sh /src
 
-# Install the dependencies for the Python sample app.
-RUN pip3 install -r /src/entitlements-samples/python-httpsample/requirements.txt
+# Install the dependencies for the Python sample app, then compile the Go
+# sample app (which will pull in it's deps automatically)
+RUN pip3 install -r /src/entitlements-samples/python-httpsample/requirements.txt && \
+	cd /src/entitlements-samples/go-httpsample && \
+	cat go.mod && \
+	go build -o carinfoserver ./cmd/carinfoserver
 
-# Compile the Go sample apps. This will implicitly pull in their dependencies.
-RUN cd /src/entitlements-samples/go-httpsample && cat go.mod && go build -o carinfoserver ./cmd/carinfoserver
-
-CMD ["sh", "/src/entrypoint.sh"]
+CMD ["sh", "/src/entitlements-samples/entrypoint.sh"]

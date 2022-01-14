@@ -63,82 +63,69 @@ if ! ps aux | grep -v grep | grep -q redoc-cli ; then
 	cat /var/log/redoc.log
 	exit 1
 fi
+echo "DONE"
 
 
 # Insert port information into the welcome message.
 sed -i 's/API_PORT/'"$API_PORT"'/g' welcome.txt
 sed -i 's/DOCS_PORT/'"$DOCS_PORT"'/g' welcome.txt
 
+# OPA endpoint we should have the sample app use.
+OPA_URL="http://localhost:8181/v1/data/main/main"
+
+# Where should we 'cd' before running the sample app?
+TARGET_DIR=/
+
+# What command should we use to run the sample app?
+RUN_COMMAND="echo 'you should enver see this'"
+
+# Detect the sample app and set our configuration appropriately.
 if [ "$SAMPLE_APP" = "go-httpsample" ] ; then
-	cd go-httpsample
+	TARGET_DIR=/src/entitlements-samples/go-httpsample
+	RUN_COMMAND="./carinfoserver --port $API_PORT --opa '$OPA_URL'"
 
-	printf "downloading OPA configuration... "
-	# Note that we need to use curl -L, since DAS_URL may have a trailing
-	# /, in which case we need to pick up the HTTP 301.
-	curl -LSs -H "Authorization: Bearer $DAS_TOKEN" -o opa-conf.yaml "$DAS_URL/v1/systems/$DAS_SYSTEM/assets/opaconfig.yaml"
-	if [ "$(wc -l < opa-conf.yaml)" -lt 2 ] ; then
-		echo "FAIL"
-		echo "opa-conf.yaml is empty! Something is wrong."
-		echo "running curl again with more verbose output, then exiting... "
-		echo "-------------"
-		set -x
-		curl -Li -H "Authorization: Bearer $DAS_TOKEN" "$DAS_URL/v1/systems/$DAS_SYSTEM/assets/opaconfig.yaml"
-		exit 1
-	fi
-	echo "DONE"
-
-	printf "launching OPA server... "
-	opa run --server --config-file=opa-conf.yaml >> /var/log/opa-server.log 2>&1 &
-	echo "DONE"
-
-	printf "launching carinfoserver... "
-	./carinfoserver --port $API_PORT --opa http://localhost:8181/v1/data/main/main >> /var/log/carinfoserver.log 2>&1 &
-	echo "DONE"
-
-	echo "launching interactive monitor... "
-
-	export FORCE_PS1="sample$ "
-	export STARTDIR="/src/entitlements-samples/go-httpsample"
-	export INJECT_COMMANDS="alias curl='curl -w \"\\n\"'"
-	export WELCOME="/src/entitlements-samples/welcome.txt"
-	sh /src/splitwatcher.sh /var/log/opa-server.log /var/log/carinfoserver.log
 
 elif [ "$SAMPLE_APP" = "python-httpsample" ] ; then
-	cd python-httpsample
-
-	printf "downloading OPA configuration... "
-	# Note that we need to use curl -L, since DAS_URL may have a trailing
-	# /, in which case we need to pick up the HTTP 301.
-	curl -LSs -H "Authorization: Bearer $DAS_TOKEN" -o opa-conf.yaml "$DAS_URL/v1/systems/$DAS_SYSTEM/assets/opaconfig.yaml"
-	if [ "$(wc -l < opa-conf.yaml)" -lt 2 ] ; then
-		echo "FAIL"
-		echo "opa-conf.yaml is empty! Something is wrong."
-		echo "running curl again with more verbose output, then exiting... "
-		echo "-------------"
-		set -x
-		curl -Li -H "Authorization: Bearer $DAS_TOKEN" "$DAS_URL/v1/systems/$DAS_SYSTEM/assets/opaconfig.yaml"
-		exit 1
-	fi
-	echo "DONE"
-
-	printf "launching OPA server... "
-	opa run --server --config-file=opa-conf.yaml >> /var/log/opa-server.log 2>&1 &
-	echo "DONE"
-
-	printf "launching carinfoserver... "
-	python3 server.py --port $API_PORT --opa http://localhost:8181/v1/data/main/main >> /var/log/carinfoserver.log 2>&1 &
-	echo "DONE"
-
-	echo "launching interactive monitor... "
-
-	export FORCE_PS1="sample$ "
-	export STARTDIR="/src/entitlements-samples/python-httpsample"
-	export INJECT_COMMANDS="alias curl='curl -w \"\\n\"'"
-	export WELCOME="/src/entitlements-samples/welcome.txt"
-	sh /src/splitwatcher.sh /var/log/opa-server.log /var/log/carinfoserver.log
+	TARGET_DIR=/src/entitlements-samples/python-httpsample
+	RUN_COMMAND="python3 server.py --port $API_PORT --opa '$OPA_URL'"
 
 else
 	echo "don't know how to run sample app '$SAMPLE_APP'" 1>&2
 	exit 1
 fi
 
+cd "$TARGET_DIR"
+
+printf "downloading OPA configuration... "
+# Note that we need to use curl -L, since DAS_URL may have a trailing
+# /, in which case we need to pick up the HTTP 301.
+curl -LSs -H "Authorization: Bearer $DAS_TOKEN" -o opa-conf.yaml "$DAS_URL/v1/systems/$DAS_SYSTEM/assets/opaconfig.yaml"
+if [ "$(wc -l < opa-conf.yaml)" -lt 2 ] ; then
+	echo "FAIL"
+	echo "opa-conf.yaml is empty! Something is wrong."
+	echo "running curl again with more verbose output, then exiting... "
+	echo "-------------"
+	set -x
+	curl -Li -H "Authorization: Bearer $DAS_TOKEN" "$DAS_URL/v1/systems/$DAS_SYSTEM/assets/opaconfig.yaml"
+	exit 1
+fi
+echo "DONE"
+
+printf "launching OPA server... "
+opa run --server --config-file=opa-conf.yaml >> /var/log/opa-server.log 2>&1 &
+echo "DONE"
+
+printf "launching $SAMPLE_APP... "
+cp /src/entitlements-samples/data.json ./
+sh -c "$RUN_COMMAND" >> /var/log/carinfoserver.log 2>&1 &
+echo "DONE"
+
+echo "launching interactive monitor... "
+
+export FORCE_PS1="sample$ "
+export STARTDIR="/src/entitlements-samples/go-httpsample"
+export INJECT_COMMANDS="alias curl='curl -w \"\\n\"'"
+export WELCOME="/src/entitlements-samples/welcome.txt"
+sh /src/entitlements-samples/splitwatcher.sh /var/log/opa-server.log /var/log/carinfoserver.log
+
+exit 0

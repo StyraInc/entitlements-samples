@@ -2,8 +2,11 @@ Welcome to the interactive Styra DAS samples container!
 
 The sample app API server is running at http://localhost:API_PORT
 
-You can interact with the running sample app using "curl" and "jq". You can
-view API documentation for the sample application by browsing to
+You can interact with the running sample app using "curl" and "jq". For example try:
+
+	curl -Ss localhost:API_PORT/cars -H "user: alice"
+
+You can view API documentation for the sample application by browsing to
 http://localhost:DOCS_PORT
 
 You can exit this session at any time with the 'exit' command or by closing any
