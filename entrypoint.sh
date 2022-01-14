@@ -134,7 +134,7 @@ export INJECT_COMMANDS="alias curl='curl -w \"\\n\"'"
 export WELCOME="/src/entitlements-samples/welcome.txt"
 
 if [ ! -z "$TEST" ] ; then
-	sh -c "sleep 2 ; tmux send-keys \"python3 ../test_api.py http://localhost:$API_PORT\" Enter" &
+	sh -c "sleep 2 ; tmux send-keys \"pytest /src/entitlements-samples/tests\" Enter" &
 fi
 
 sh /src/entitlements-samples/splitwatcher.sh /var/log/opa-server.log /var/log/carinfoserver.log

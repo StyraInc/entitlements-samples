@@ -55,8 +55,9 @@ RUN curl -sL https://deb.nodesource.com/setup_16.x | bash && \
 
 # Copy in the source code for our samples, plus the entrypoint script
 RUN mkdir -p /src/entitlements-samples/go-httpsample && \
-	mkdir -p /src/entitlements-samples/go-embeddedsample & \
-	mkdir -p /src/entitlements-samples/python-httpsample
+	mkdir -p /src/entitlements-samples/go-embeddedsample && \
+	mkdir -p /src/entitlements-samples/python-httpsample && \
+	mkdir -p /src/entitlements-samples/tests
 COPY carinfostore.yml \
 	welcome.txt \
 	entrypoint.sh \
@@ -66,13 +67,17 @@ COPY carinfostore.yml \
 	/src/entitlements-samples
 COPY python-httpsample/ /src/entitlements-samples/python-httpsample
 COPY go-httpsample/ /src/entitlements-samples/go-httpsample
+COPY tests/ /src/entitlements-samples/tests
 #COPY go-embeddedsample/ /src/entitlements-samples/go-embeddedsample
 
 # Install the dependencies for the Python sample app, then compile the Go
-# sample app (which will pull in it's deps automatically)
+# sample app (which will pull in it's deps automatically).
+#
+# pytest and pytest-order are needed to run the test suite.
 RUN pip3 install -r /src/entitlements-samples/python-httpsample/requirements.txt && \
 	cd /src/entitlements-samples/go-httpsample && \
 	cat go.mod && \
-	go build -o carinfoserver ./cmd/carinfoserver
+	go build -o carinfoserver ./cmd/carinfoserver && \
+	pip3 install pytest pytest-order
 
 CMD ["sh", "/src/entitlements-samples/entrypoint.sh"]

@@ -71,7 +71,9 @@ def validate_car_id(car_id):
     Returns true if the car ID is valid and false otherwise.
     """
 
-    return bool(re.match("^car(0|([1-9][0-9]*))$", car_id))
+    ok = bool(re.match("^car(0|([1-9][0-9]*))$", car_id))
+    api.logger.info("car_id '{}' is valid: {}".format(car_id, ok))
+    return ok
 
 def next_car_id():
     """
@@ -220,13 +222,12 @@ def api_get_cars():
 def api_post_cars():
     user = request.headers.get("user")
     data = request.get_json(force=True)
+
+    if not get_decision(["cars"], user, "POST"):
+        return Response(json.dumps({"msg": "action prohibited by OPA policy"}), status=403, mimetype="application/json")
+
     new_id = new_car(data)
-    return response_with_decision(
-            ["cars"],
-            user,
-            "POST",
-            Response(json.dumps(new_id), status=200, mimetype="application/json")
-    )
+    return Response(json.dumps(new_id), status=200, mimetype="application/json")
 
 @api.route("/cars/<string:car_id>", methods=["GET"])
 def api_get_car_by_id(car_id):
@@ -249,7 +250,7 @@ def api_put_car_by_id(car_id):
     user = request.headers.get("user")
 
     if not validate_car_id(car_id):
-        resp = Response(json.dumps({"msg": "invalid car ID '{}'".format(car_id)}), status=400, mimetype="application/json")
+        return Response(json.dumps({"msg": "invalid car ID '{}'".format(car_id)}), status=400, mimetype="application/json")
 
     if not get_decision(["cars", car_id], user, "PUT"):
         return Response(json.dumps({"msg": "action prohibited by OPA policy"}), status=403, mimetype="application/json")
