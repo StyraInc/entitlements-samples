@@ -1,0 +1,244 @@
+openapi: 3.1.0
+info:
+  version: 1.0.0
+  title: CarInfoStore API
+  description: A simple API for an imaginary car dealership to help you understand OPA/DAS integration
+  license:
+    name: TODO
+    url: https://example.com
+
+servers:
+  - url: http://localhost
+
+paths:
+  /cars:
+    get:
+      operationId: getCars
+      summary: Retrieve a map from all car IDs to the corresponding car objects.
+      responses:
+        200:
+          description: The operation completed successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                propertyNames:
+                  $ref: "#/components/schemas/car_id"
+                additionalProperties:
+                  $ref: "#/components/schemas/car"
+              example: {
+                "car0": {
+                  "make": "Honda",
+                  "model": "CRV",
+                  "color": "blue",
+                  "year": 2016
+                },
+                "car1": {
+                  "make": "Ford",
+                  "model": "F-150",
+                  "color": "red",
+                  "year": 2009
+                }
+              }
+
+
+        403:
+          description: An OPA policy has restricted access to this API.
+
+    post:
+      operationId: postCars
+      summary: Upload a new car to the database.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/car"
+
+      responses:
+        200:
+          description: The operation completed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/car_id"
+
+        403:
+          description: An OPA policy has restricted access to this API.
+
+  /cars/{car_id}:
+    parameters:
+      - name: car_id
+        in: path
+        required: true
+        schema:
+          $ref: "#/components/schemas/car_id"
+    get:
+      operationId: getCarById
+      summary: Retrieve a specific car by its unique ID
+      responses:
+        200:
+          description: The operation completed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/car"
+
+        403:
+          description: An OPA policy has restricted access to this API.
+
+        404:
+          description: No car found with the specified ID.
+
+    put:
+      operationId: putCarById
+      summary: Modify or create a car by its unique ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/car"
+
+      responses:
+        200:
+          description: The car already existed and was modified.
+
+        201:
+          description: The car did not already exist and was created.
+
+        400:
+          description: The car ID or the car object was invalid.
+
+        403:
+          description: An OPA policy has restricted access to this API.
+
+    delete:
+      operationId: deleteCarById
+      summary: Delete a car by it's unique ID.
+
+      responses:
+        200:
+          description: The car did not exist, or it was successfully deleted.
+
+        403:
+          description: An OPA policy has restricted access to this API.
+
+  /cars/{car_id}/status:
+    parameters:
+      - name: car_id
+        in: path
+        required: true
+        schema:
+          $ref: "#/components/schemas/car_id"
+
+    get:
+      operationId: getCarStatus
+      summary: Retrieve the status of the specified car.
+      responses:
+
+        200:
+          description: The operation completed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/status"
+
+        403:
+          description: An OPA policy has restricted access to this API.
+
+        404:
+          description: The car with the specified ID either does not exist, or it has no status.
+
+    put:
+      operationId: putCarStatus
+      summary: Modify the status of the specified car.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/status"
+
+      responses:
+        200:
+          description: The status of the car already existed and was modified.
+
+        201:
+          description: The status of the car did not exist and was created.
+
+        403:
+          description: An OPA policy has restricted access to this API.
+
+        404:
+          description: The car with the specified ID does not exist.
+
+
+components:
+  schemas:
+    car_id:
+      type: string
+      pattern: '^car(0|([1-9][0-9]*))$'
+      description: a unique identifier for a specific car
+      examples:
+        - car0
+        - car1
+        - car53
+
+    car:
+      type: object
+      required:
+        - make
+        - model
+        - year
+        - color
+      properties:
+        make:
+          type: string
+        model:
+          type: string
+        color:
+          type: string
+        year:
+          type: integer
+      examples:
+        - {
+            "make": "Honda",
+            "model": "CRV",
+            "color": "blue",
+            "year": 2016
+          }
+        - {
+            "make": "Ford",
+            "model": "F-150",
+            "color": "red",
+            "year": 2009
+          }
+
+    status:
+      type: object
+      required:
+        - sold
+        - ready
+        - price
+      properties:
+        sold:
+          type: boolean
+          description: "True if the car has already been sold."
+        ready:
+          type: boolean
+          description: "True if the car is ready to be sold."
+        price:
+          type: number
+          description: "The price of the car."
+      examples:
+        - {
+            "sold": false,
+            "ready": true,
+            "price": 30000
+          }
+        - {
+            "sold": true,
+            "ready": false,
+            "price": 27500
+          }
