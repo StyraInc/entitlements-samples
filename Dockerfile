@@ -63,7 +63,6 @@ COPY carinfostore.yml \
 	entrypoint.sh \
 	splitwatcher.sh \
 	data.json \
-	test_api.py \
 	/src/entitlements-samples
 COPY python-httpsample/ /src/entitlements-samples/python-httpsample
 COPY go-httpsample/ /src/entitlements-samples/go-httpsample

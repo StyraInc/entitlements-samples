@@ -14,3 +14,6 @@ tmux pane. Remember that any changes you make here will be deleted when you
 exit the session.
 
 For more information, visit https://github.com/StyraInc/entitlements-samples
+
+TIP: trying to copy-paste? Try holding 'shift' or 'alt' while you click and
+drag. (see also: https://superuser.com/a/506744)
