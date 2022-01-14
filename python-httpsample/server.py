@@ -179,6 +179,15 @@ def get_decision(path, user, method):
         api.logger.error("path='{}' user='{}' method='{}' decision={} OPA reported status code {}, body: {}".format(path, user, method, False, response.status_code, response.text))
         return False
 
+    result = response.json()
+    if "result" not in result:
+        api.logger.error("response from OPA '{}' had no result field".format(result))
+        return False
+
+    if "allowed" not in result["result"]:
+        api.logger.error("response from OPA '{}' had no result.allowed field".format(result))
+        return False
+
     decision = bool(response.json()["result"]["allowed"])
 
     api.logger.info("path='{}' user='{}' method='{}' decision={}".format(path, user, method, decision))
@@ -240,7 +249,7 @@ def api_put_car_by_id(car_id):
     user = request.headers.get("user")
 
     if not validate_car_id(car_id):
-        resp = Response("invalid car ID '{}'".format(car_id), status=403, mimetype="text/plain")
+        resp = Response("invalid car ID '{}'".format(car_id), status=400, mimetype="text/plain")
 
     if not get_decision(["cars", car_id], user, "PUT"):
         return Response("action prohibited by OPA policy", status=403, mimetype="text/plain")
@@ -264,6 +273,10 @@ def api_delete_car_by_id(car_id):
     data = read_database()
     if car_id in data["cars"]:
         data["cars"].pop(car_id)
+        write_database(data)
+
+    if car_id in data["statuses"]:
+        data["statuses"].pop(car_id)
         write_database(data)
 
     return Response(None, status=200)
