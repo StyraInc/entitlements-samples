@@ -15,5 +15,5 @@ exit the session.
 
 For more information, visit https://github.com/StyraInc/entitlements-samples
 
-TIP: trying to copy-paste? Try holding 'shift' or 'alt' while you click and
-drag. (see also: https://superuser.com/a/506744)
+TIP: use ctrl+b then PageUp to enter scroll mode. Press Return to leave scroll
+mode.

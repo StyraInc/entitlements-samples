@@ -34,7 +34,6 @@ set -g pane-border-status top
 set -g status off
 set-option -g destroy-unattached off
 set-option -g remain-on-exit off
-set -g mouse on
 EOF
 trap "rm -f '$TMUX_CONFIG_FILE'" EXIT HUP INT QUIT PIPE TERM
 
