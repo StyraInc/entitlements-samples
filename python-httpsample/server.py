@@ -234,9 +234,9 @@ def api_get_car_by_id(car_id):
     user = request.headers.get("user")
 
     cars = get_cars()
-    resp = Response("no such car with ID '{}'".format(car_id), status=404, mimetype="text/plain")
+    resp = Response(json.dumps({"msg": "no such car with ID '{}'".format(car_id)}), status=404, mimetype="text/plain")
     if car_id in cars:
-        resp = Response(json.dumps(get_cars()), status=200, mimetype="application/json")
+        resp = Response(json.dumps(get_car(car_id)), status=200, mimetype="application/json")
 
     return response_with_decision(
             ["cars", car_id],

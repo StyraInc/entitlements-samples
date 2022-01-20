@@ -4,6 +4,31 @@ import requests
 import json
 import os
 
+"""
+Example Rego that is appropriate for this test:
+
+enforce[decision] {
+  #title: user is alice
+  input.user == "alice"
+  decision := {
+    "allowed": true,
+    "entz": set(),
+    "message": "user is alice"
+  }
+}
+
+enforce[decision] {
+  #title: user is bob
+  input.user == "bob"
+  input.method == "GET"
+  decision := {
+    "allowed": true,
+    "entz": set(),
+    "message": "user is bob"
+  }
+}
+"""
+
 car0 = {"make": "Honda", "model": "CRV", "color": "black", "year": 2011}
 car5 = {"make": "Ford", "model": "F-150", "color": "red", "year": 1999}
 car0status = {"price": 15000, "ready": True, "sold": False}
@@ -141,4 +166,20 @@ def test_put_car_status():
 
     # We should not be able to PUT a status to a car that does not exist
     code, response = request(["cars", "car17", "status"], user = "john", method="PUT", body=car5status)
+    assert code >= 400
+
+# Make sure that GET on a specific ar ID returns only that car ID.
+@pytest.mark.order(6)
+def test_get_car():
+    code, response = request(["cars", "car0"], user = "alice", method="GET")
+    assert code < 400
+    assert response == car0
+
+    code, response = request(["cars", "car5"], user = "alice", method="GET")
+    assert code < 400
+    assert response == car5
+
+    # car1 does not exist, but this will catch it if the error message is not
+    # JSON formatted
+    code, response = request(["cars", "car1"], user = "alice", method="GET")
     assert code >= 400
