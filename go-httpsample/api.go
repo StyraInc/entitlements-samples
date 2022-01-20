@@ -10,17 +10,32 @@ import (
 	"github.com/gorilla/mux"
 )
 
+func jsonError(w http.ResponseWriter, message string, code int) {
+	var msg struct {
+		Msg string `json:"msg"`
+	}
+	msg.Msg = message
+
+	b, err := json.Marshal(msg)
+	if err != nil {
+		// should never happen
+		panic(fmt.Sprintf("error while marshaling '%s': %v\n", msg, err))
+	}
+
+	http.Error(w, string(b), code)
+}
+
 // getCars handles GET /cars, returning a list of car objects.
 func getCars(w http.ResponseWriter, r *http.Request) {
 	log.Printf("%s GET /cars\n", r.RemoteAddr)
 
 	allowed, err := decision([]string{"cars"}, r.Header.Get("user"), "GET")
 	if err != nil {
-		http.Error(w, err.Error(), 500)
+		jsonError(w, err.Error(), 500)
 		return
 	}
 	if !allowed {
-		http.Error(w, "operation prohibited by OPA policy", 403)
+		jsonError(w, "operation prohibited by OPA policy", 403)
 		return
 	}
 
@@ -30,7 +45,7 @@ func getCars(w http.ResponseWriter, r *http.Request) {
 		var ok bool
 		cars[id], ok = GetCar(id)
 		if !ok {
-			http.Error(w, fmt.Sprintf("have id '%s', but not matching car", id), 500)
+			jsonError(w, fmt.Sprintf("have id '%s', but not matching car", id), 500)
 			return
 		}
 	}
@@ -46,23 +61,23 @@ func postCars(w http.ResponseWriter, r *http.Request) {
 
 	allowed, err := decision([]string{"cars"}, r.Header.Get("user"), "POST")
 	if err != nil {
-		http.Error(w, err.Error(), 500)
+		jsonError(w, err.Error(), 500)
 		return
 	}
 	if !allowed {
-		http.Error(w, "operation prohibited by OPA policy", 403)
+		jsonError(w, "operation prohibited by OPA policy", 403)
 		return
 	}
 
 	car := &Car{}
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		http.Error(w, err.Error(), 400)
+		jsonError(w, err.Error(), 400)
 		return
 	}
 	err = json.Unmarshal(body, car)
 	if err != nil {
-		http.Error(w, err.Error(), 400)
+		jsonError(w, err.Error(), 400)
 		return
 	}
 
@@ -89,17 +104,17 @@ func getCarByID(w http.ResponseWriter, r *http.Request) {
 
 	allowed, err := decision([]string{"cars", id}, r.Header.Get("user"), "GET")
 	if err != nil {
-		http.Error(w, err.Error(), 500)
+		jsonError(w, err.Error(), 500)
 		return
 	}
 	if !allowed {
-		http.Error(w, "operation prohibited by OPA policy", 403)
+		jsonError(w, "operation prohibited by OPA policy", 403)
 		return
 	}
 
 	car, ok := GetCar(id)
 	if !ok {
-		http.Error(w, fmt.Sprintf("no such car with ID '%s'", id), 404)
+		jsonError(w, fmt.Sprintf("no such car with ID '%s'", id), 404)
 		return
 	}
 
@@ -115,28 +130,28 @@ func putCarByID(w http.ResponseWriter, r *http.Request) {
 
 	allowed, err := decision([]string{"cars", id}, r.Header.Get("user"), "PUT")
 	if err != nil {
-		http.Error(w, err.Error(), 500)
+		jsonError(w, err.Error(), 500)
 		return
 	}
 	if !allowed {
-		http.Error(w, "operation prohibited by OPA policy", 403)
+		jsonError(w, "operation prohibited by OPA policy", 403)
 		return
 	}
 
 	if !ValidateID(id) {
-		http.Error(w, fmt.Sprintf("invalid ID '%s'", id), 400)
+		jsonError(w, fmt.Sprintf("invalid ID '%s'", id), 400)
 		return
 	}
 
 	car := &Car{}
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		http.Error(w, err.Error(), 400)
+		jsonError(w, err.Error(), 400)
 		return
 	}
 	err = json.Unmarshal(body, car)
 	if err != nil {
-		http.Error(w, err.Error(), 400)
+		jsonError(w, err.Error(), 400)
 		return
 	}
 
@@ -159,11 +174,11 @@ func deleteCarByID(w http.ResponseWriter, r *http.Request) {
 
 	allowed, err := decision([]string{"cars", id}, r.Header.Get("user"), "DELETE")
 	if err != nil {
-		http.Error(w, err.Error(), 500)
+		jsonError(w, err.Error(), 500)
 		return
 	}
 	if !allowed {
-		http.Error(w, "operation prohibited by OPA policy", 403)
+		jsonError(w, "operation prohibited by OPA policy", 403)
 		return
 	}
 
@@ -179,29 +194,29 @@ func putStatus(w http.ResponseWriter, r *http.Request) {
 
 	allowed, err := decision([]string{"cars", id, "status"}, r.Header.Get("user"), "PUT")
 	if err != nil {
-		http.Error(w, err.Error(), 500)
+		jsonError(w, err.Error(), 500)
 		return
 	}
 	if !allowed {
-		http.Error(w, "operation prohibited by OPA policy", 403)
+		jsonError(w, "operation prohibited by OPA policy", 403)
 		return
 	}
 
 	status := &Status{}
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		http.Error(w, err.Error(), 400)
+		jsonError(w, err.Error(), 400)
 		return
 	}
 	err = json.Unmarshal(body, status)
 	if err != nil {
-		http.Error(w, err.Error(), 400)
+		jsonError(w, err.Error(), 400)
 		return
 	}
 
 	exists, err := SetStatus(id, *status)
 	if err != nil {
-		http.Error(w, err.Error(), 400)
+		jsonError(w, err.Error(), 400)
 	}
 
 	go SaveToDisk()
@@ -223,17 +238,17 @@ func getStatus(w http.ResponseWriter, r *http.Request) {
 
 	allowed, err := decision([]string{"cars", id, "status"}, r.Header.Get("user"), "GET")
 	if err != nil {
-		http.Error(w, err.Error(), 500)
+		jsonError(w, err.Error(), 500)
 		return
 	}
 	if !allowed {
-		http.Error(w, "operation prohibited by OPA policy", 403)
+		jsonError(w, "operation prohibited by OPA policy", 403)
 		return
 	}
 
 	status, ok := GetStatus(id)
 	if !ok {
-		http.Error(w, fmt.Sprintf("no status for car with ID '%s'", id), 404)
+		jsonError(w, fmt.Sprintf("no status for car with ID '%s'", id), 404)
 		return
 	}
 
