@@ -37,14 +37,14 @@ type PersistanceData struct {
 // OPAInput represents the input data
 type OPAInput struct {
 	// Path represents the REST path components
-	Path []string `json:"path"`
+	Path []string `json:"resource"`
 
 	// User is the name of the user making the request (because this is an
 	// example, we hand-wave any actual authentication).
-	User string `json:"user"`
+	User string `json:"subject"`
 
 	// Method is the HTTP method being used, e.g. GET, PUT, etc.
-	Method string `json:"method"`
+	Method string `json:"action"`
 }
 
 // OPADecision represents an entire decision from the OPA server.
