@@ -1,5 +1,9 @@
 #!/bin/sh
 
+# Copyright 2022 Styra Inc. All rights reserved.
+# Use of this source code is governed by an Apache2
+# license that can be found in the LICENSE file.
+
 # This script automates tmux to create a two-row layout, where the top row is
 # evenly split among several "file watchers" (tail -f instances), and the
 # bottom row is an interactive terminal.

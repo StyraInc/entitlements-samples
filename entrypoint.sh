@@ -1,5 +1,9 @@
 #!/bin/sh
 
+# Copyright 2022 Styra Inc. All rights reserved.
+# Use of this source code is governed by an Apache2
+# license that can be found in the LICENSE file.
+
 set -e
 set -u
 
@@ -82,6 +86,10 @@ TARGET_DIR=/
 # What command should we use to run the sample app?
 RUN_COMMAND="echo 'you should enver see this'"
 
+# If YES, launch OPA as a sidecar, otherwise we assume the application is using
+# a built-in SDK.
+LAUNCH_OPA=YES
+
 # Detect the sample app and set our configuration appropriately.
 if [ "$SAMPLE_APP" = "go-httpsample" ] ; then
 	TARGET_DIR=/src/entitlements-samples/go-httpsample
@@ -91,6 +99,11 @@ if [ "$SAMPLE_APP" = "go-httpsample" ] ; then
 elif [ "$SAMPLE_APP" = "python-httpsample" ] ; then
 	TARGET_DIR=/src/entitlements-samples/python-httpsample
 	RUN_COMMAND="python3 server.py --port $API_PORT --opa '$OPA_URL'"
+
+elif [ "$SAMPLE_APP" = "go-sdksample" ] ; then
+	TARGET_DIR=/src/entitlements-samples/go-sdksample
+	RUN_COMMAND="./carinfoserver --port $API_PORT --config '$TARGET_DIR/opa-conf.yaml'"
+	LAUNCH_OPA=NO
 
 else
 	echo "don't know how to run sample app '$SAMPLE_APP'" 1>&2
@@ -114,9 +127,11 @@ if [ "$(wc -l < opa-conf.yaml)" -lt 2 ] ; then
 fi
 echo "DONE"
 
-printf "launching OPA server... "
-opa run --server --config-file=opa-conf.yaml >> /var/log/opa-server.log 2>&1 &
-echo "DONE"
+if [ "$LAUNCH_OPA" = "YES" ] ; then
+	printf "launching OPA server... "
+	opa run --server --config-file=opa-conf.yaml >> /var/log/opa-server.log 2>&1 &
+	echo "DONE"
+fi
 
 printf "launching $SAMPLE_APP... "
 if [ -z "$TEST" ] ; then
@@ -137,6 +152,10 @@ if [ ! -z "$TEST" ] ; then
 	sh -c "sleep 2 ; tmux send-keys \"pytest /src/entitlements-samples/tests\" Enter" &
 fi
 
-sh /src/entitlements-samples/splitwatcher.sh /var/log/opa-server.log /var/log/carinfoserver.log
+if [ "$LAUNCH_OPA" = "YES" ] ; then
+	sh /src/entitlements-samples/splitwatcher.sh /var/log/opa-server.log /var/log/carinfoserver.log
+else
+	sh /src/entitlements-samples/splitwatcher.sh /var/log/carinfoserver.log
+fi
 
 exit 0

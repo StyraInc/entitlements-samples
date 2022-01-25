@@ -1,3 +1,7 @@
+# Copyright 2022 Styra Inc. All rights reserved.
+# Use of this source code is governed by an Apache2
+# license that can be found in the LICENSE file.
+
 # This Dockerfile defines the base environment for all of the
 # entitlements-samples to run it. It embeds each of them and determines which
 # one to call based on an environment variable (see `entrypoint.py`).
@@ -66,6 +70,7 @@ COPY carinfostore.yml \
 	/src/entitlements-samples
 COPY python-httpsample/ /src/entitlements-samples/python-httpsample
 COPY go-httpsample/ /src/entitlements-samples/go-httpsample
+COPY go-sdksample/ /src/entitlements-samples/go-sdksample
 COPY tests/ /src/entitlements-samples/tests
 #COPY go-embeddedsample/ /src/entitlements-samples/go-embeddedsample
 
@@ -75,7 +80,10 @@ COPY tests/ /src/entitlements-samples/tests
 # pytest and pytest-order are needed to run the test suite.
 RUN pip3 install -r /src/entitlements-samples/python-httpsample/requirements.txt && \
 	cd /src/entitlements-samples/go-httpsample && \
-	cat go.mod && \
+	go mod tidy && \
+	go build -o carinfoserver ./cmd/carinfoserver && \
+	cd /src/entitlements-samples/go-sdksample && \
+	go mod tidy && \
 	go build -o carinfoserver ./cmd/carinfoserver && \
 	pip3 install pytest pytest-order
 
