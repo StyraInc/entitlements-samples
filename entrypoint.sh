@@ -144,7 +144,7 @@ echo "DONE"
 echo "launching interactive monitor... "
 
 export FORCE_PS1="sample$ "
-export STARTDIR="/src/entitlements-samples/go-httpsample"
+export STARTDIR="$TARGET_DIR"
 export INJECT_COMMANDS="alias curl='curl -w \"\\n\"'"
 export WELCOME="/src/entitlements-samples/welcome.txt"
 
