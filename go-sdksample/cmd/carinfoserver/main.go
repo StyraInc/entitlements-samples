@@ -9,6 +9,7 @@ import (
 
 	httpsample "github.com/styrainc/entitlements-samples/go-sdksample"
 
+	"github.com/open-policy-agent/opa/logging"
 	"github.com/open-policy-agent/opa/sdk"
 )
 
@@ -38,6 +39,11 @@ func main() {
 		// create a new OPA client with the config
 		opa, err := sdk.New(ctx, sdk.Options{
 			Config: f,
+
+			// This is not suggested for production use, but is
+			// nice for the sample as it allows seeing when OPA
+			// has updated the policy bundle.
+			Logger: logging.New(),
 		})
 		if err != nil {
 			panic(err)
