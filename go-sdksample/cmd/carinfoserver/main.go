@@ -16,7 +16,7 @@ var CLI struct {
 	Storage string `name:"path" short:"p" type:"path" default:"./" help:"Directory where persistent data should be stored."`
 	Port    int    `name:"port" short:"P" type:"int" default:8123 help:"Port where API should be served."`
 	Config  string `name:"config" short:"o" type:"path" help:"Path to OPA configuration file. If omitted, OPA support will be disabled."`
-	Rule    string `name:"rule" short:"r" default:"/main/main" type:"path" help:"OPA rule path"`
+	Rule    string `name:"rule" short:"r" default:"/main/main/outcome/allow" type:"path" help:"OPA rule path"`
 }
 
 func main() {

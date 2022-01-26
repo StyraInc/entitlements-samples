@@ -6,6 +6,7 @@ package sdksample
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/open-policy-agent/opa/sdk"
@@ -53,9 +54,13 @@ func decision(path []string, user, method string) (bool, error) {
 		return false, err
 	}
 
-	log.Printf("OPA result: allowed=%v\n", result)
+	boolResult, ok := result.Result.(bool)
+	if !ok {
+		panic(fmt.Sprintf("Expected result to be boolean, is your rule path '%s' right? Result was: %v\n", rule, result))
+	}
 
-	// TODO: fix this
-	return true, nil
+	log.Printf("OPA result: ID=%s, allowed=%v\n", result.ID, boolResult)
+
+	return boolResult, nil
 
 }

@@ -13,7 +13,7 @@ Example Rego that is appropriate for this test:
 
 enforce[decision] {
   #title: user is alice
-  input.user == "alice"
+  input.subject == "alice"
   decision := {
     "allowed": true,
     "entz": set(),
@@ -23,8 +23,8 @@ enforce[decision] {
 
 enforce[decision] {
   #title: user is bob
-  input.user == "bob"
-  input.method == "GET"
+  input.subject == "bob"
+  input.action == "GET"
   decision := {
     "allowed": true,
     "entz": set(),
