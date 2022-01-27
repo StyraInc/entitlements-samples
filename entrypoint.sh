@@ -102,7 +102,9 @@ elif [ "$SAMPLE_APP" = "python-httpsample" ] ; then
 
 elif [ "$SAMPLE_APP" = "go-sdksample" ] ; then
 	TARGET_DIR=/src/entitlements-samples/go-sdksample
-	RUN_COMMAND="./carinfoserver --port $API_PORT --config '$TARGET_DIR/opa-conf.yaml' --rule '/main/main/outcome/allow'"
+	# NOTE: the rule path, and the allow path for within that rule, are 
+	# left at their defaults.
+	RUN_COMMAND="./carinfoserver --port $API_PORT --config '$TARGET_DIR/opa-conf.yaml'"
 	LAUNCH_OPA=NO
 
 else
