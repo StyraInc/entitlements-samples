@@ -55,7 +55,7 @@ if [ -z "$DOCS_PORT" ] ; then DOCS_PORT=8080; fi
 set -e
 
 # Update the OAPIv3.1 spec to report the correct port.
-sed -i 's/http:\/\/localhost:8123/http:\/\/localhost:'"$API_PORT"'/g' /src/entitlements-samples/carinfostore.yml 
+sed -i 's/http:\/\/localhost:8123/http:\/\/localhost:'"$API_PORT"'/g' /src/entitlements-samples/carinfostore.yml
 
 cd /src/entitlements-samples
 
@@ -102,9 +102,16 @@ elif [ "$SAMPLE_APP" = "python-httpsample" ] ; then
 
 elif [ "$SAMPLE_APP" = "go-sdksample" ] ; then
 	TARGET_DIR=/src/entitlements-samples/go-sdksample
-	# NOTE: the rule path, and the allow path for within that rule, are 
+	# NOTE: the rule path, and the allow path for within that rule, are
 	# left at their defaults.
 	RUN_COMMAND="./carinfoserver --port $API_PORT --config '$TARGET_DIR/opa-conf.yaml'"
+	LAUNCH_OPA=NO
+
+elif [ "$SAMPLE_APP" = "entz-playground" ] ; then
+	TARGET_DIR=/src/entitlements-samples/entz-playground
+	# NOTE: the rule path, and the allow path for within that rule, are
+	# left at their defaults.
+	RUN_COMMAND="./entz-playground --port $API_PORT --config '$TARGET_DIR/opa-conf.yaml'"
 	LAUNCH_OPA=NO
 
 else

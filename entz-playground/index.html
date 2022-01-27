@@ -1,0 +1,93 @@
+<!-- Copyright 2022 Styra Inc. All rights reserved. -->
+<!-- Use of this source code is governed by an Apache2 -->
+<!-- license that can be found in the LICENSE file. -->
+
+<script>
+    function onSubmit() {
+        var subject = document.getElementById("subjectInput").value
+        var action = document.getElementById("actionInput").value
+        var resource = document.getElementById("resourceInput").value
+        var body = document.getElementById("bodyInput").value
+
+        var xhr = new XMLHttpRequest()
+        xhr.open("POST", "/submit")
+        xhr.setRequestHeader("Content-Type", "application/json")
+        xhr.send(`
+{
+   "subject": "${subject}",
+   "action": "${action}",
+   "resource": "${resource}",
+   "body": "${body}"
+}
+`)
+        xhr.onreadystatechange = function () {
+            if (this.readyState != 4) { return }
+            const resultsDiv = document.getElementById("results")
+            resultsDiv.innerHTML = ''
+            const resultsH2 = document.createElement("h2")
+            resultsH2.innerHTML = "Results"
+            resultsDiv.appendChild(resultsH2)
+
+            if (this.status >= 400) {
+                const errorMsg = document.createElement("p")
+                errorMsg.innerHTML = `ERROR: backend returned status code ${this.status}`
+                resultsDiv.appendChild(errorMsg)
+                return
+            }
+
+            var data = JSON.parse(this.responseText)
+            if (data.error != "") {
+                const errH3 = document.createElement("h3")
+                errH3.innerHTML = "Error"
+                resultsDiv.appendChild(errH3)
+
+                const errCode = document.createElement("code")
+                errCode.innerHTML = data.error
+                resultsDiv.appendChild(errCode)
+            }
+
+            const allowedH3 = document.createElement("h3")
+            allowedH3.innerHTML = `Allowed: ${data.allowed}`
+            resultsDiv.appendChild(allowedH3)
+
+            const respH3 = document.createElement("h3")
+            respH3.innerHTML = "Response"
+            resultsDiv.appendChild(respH3)
+
+            const respCode = document.createElement("code")
+            respCode.innerHTML = JSON.stringify(data.response)
+            resultsDiv.appendChild(respCode)
+        }
+    }
+
+    function onClear() {
+        var subject = document.getElementById("subjectInput")
+        var action = document.getElementById("actionInput")
+        var resource = document.getElementById("resourceInput")
+        var body = document.getElementById("bodyInput")
+
+        subject.value = ""
+        action.value = ""
+        resource.value = ""
+        body.value = ""
+
+        const resultsDiv = document.getElementById("results")
+        resultsDiv.innerHTML = ''
+    }
+
+</script>
+
+<h1>Entitlements Playground</h1>
+    <h2>Request Entry</h2>
+        <label>Subject:</label><br />
+        <input id="subjectInput" type="text" name="subject"><br />
+        <label>Action:</label><br />
+        <input id="actionInput" type="text" name="action"><br />
+        <label>Resource:</label><br />
+        <input id="resourceInput" type="text" name="resource"><br />
+        <label>Body:</label><br />
+        <input id="bodyInput" type="text" name="body"><br />
+        <button type="button" onclick="onSubmit()">Submit</button>
+        <button type="button" onclick="onClear()">Clear Form</button>
+
+<div id="results"/>

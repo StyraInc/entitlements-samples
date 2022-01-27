@@ -61,6 +61,7 @@ RUN curl -sL https://deb.nodesource.com/setup_16.x | bash && \
 RUN mkdir -p /src/entitlements-samples/go-httpsample && \
 	mkdir -p /src/entitlements-samples/go-embeddedsample && \
 	mkdir -p /src/entitlements-samples/python-httpsample && \
+	mkdir -p /src/entitlements-samples/entz-playground && \
 	mkdir -p /src/entitlements-samples/tests
 COPY carinfostore.yml \
 	welcome.txt \
@@ -71,6 +72,7 @@ COPY carinfostore.yml \
 COPY python-httpsample/ /src/entitlements-samples/python-httpsample
 COPY go-httpsample/ /src/entitlements-samples/go-httpsample
 COPY go-sdksample/ /src/entitlements-samples/go-sdksample
+COPY entz-playground/ /src/entitlements-samples/entz-playground
 COPY tests/ /src/entitlements-samples/tests
 #COPY go-embeddedsample/ /src/entitlements-samples/go-embeddedsample
 
@@ -85,6 +87,9 @@ RUN pip3 install -r /src/entitlements-samples/python-httpsample/requirements.txt
 	cd /src/entitlements-samples/go-sdksample && \
 	go mod tidy && \
 	go build -o carinfoserver ./cmd/carinfoserver && \
+	cd /src/entitlements-samples/entz-playground && \
+	go mod tidy && \
+	go build -o entz-playground ./cmd/entz-playground && \
 	pip3 install pytest pytest-order
 
 CMD ["sh", "/src/entitlements-samples/entrypoint.sh"]

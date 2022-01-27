@@ -1,3 +1,7 @@
+// Copyright 2022 Styra Inc. All rights reserved.
+// Use of this source code is governed by an Apache2
+// license that can be found in the LICENSE file.
+
 package main
 
 import (
@@ -7,7 +11,7 @@ import (
 
 	"github.com/alecthomas/kong"
 
-	httpsample "github.com/styrainc/entitlements-samples/go-sdksample"
+	"github.com/styrainc/entitlements-samples/go-sdksample"
 
 	"github.com/open-policy-agent/opa/logging"
 	"github.com/open-policy-agent/opa/sdk"
@@ -52,16 +56,16 @@ func main() {
 
 		defer opa.Stop(ctx)
 
-		err = httpsample.SetStorageDir(CLI.Storage)
+		err = sdksample.SetStorageDir(CLI.Storage)
 		if err != nil {
 			panic(err)
 		}
 
-		httpsample.SetOPA(opa, ctx)
-		httpsample.SetOPARule(CLI.Rule, CLI.Allow)
+		sdksample.SetOPA(opa, ctx)
+		sdksample.SetOPARule(CLI.Rule, CLI.Allow)
 	}
 
-	httpsample.LoadFromDisk()
-	httpsample.HandleRequests(CLI.Port)
+	sdksample.LoadFromDisk()
+	sdksample.HandleRequests(CLI.Port)
 
 }
