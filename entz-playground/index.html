@@ -3,11 +3,55 @@
 <!-- license that can be found in the LICENSE file. -->
 
 <script>
-    function onSubmit() {
-        var subject = document.getElementById("subjectInput").value
-        var action = document.getElementById("actionInput").value
-        var resource = document.getElementById("resourceInput").value
-        var body = document.getElementById("bodyInput").value
+    var watchNum = 0
+    const watcherIntervalMs = 5000
+    const samples = {
+        "sample 1": {
+                "subject": "alice",
+                "action": "GET",
+                "resource": "/cars",
+                "body": ""
+        },
+        "sample 2": {
+                "subject": "bob",
+                "action": "GET",
+                "resource": "/cars/car0",
+                "body": ""
+        }
+    }
+
+    // We want to delay this until after the browser has had time to read
+    // the HTML of the document, since we need to know where the div is.
+    setTimeout(() => {
+        const sampleButtonsDiv = document.getElementById("sampleButtons")
+        for (const sampleName in samples) {
+                const sampleButton = document.createElement("button")
+                sampleButton.type = "button"
+                sampleButton.setAttribute("onClick", `populateSample("${sampleName}")`)
+                sampleButton.innerHTML = sampleName
+                sampleButtonsDiv.appendChild(sampleButton)
+        }
+    }, 500)
+
+    function populateSample(sampleName) {
+        // Replaces the values in the form with the data for the given samples.
+
+        var subject = document.getElementById("subjectInput")
+        var action = document.getElementById("actionInput")
+        var resource = document.getElementById("resourceInput")
+        var body = document.getElementById("bodyInput")
+
+        subject.value = samples[sampleName].subject
+        action.value = samples[sampleName].action
+        resource.value = samples[sampleName].resource
+        body.value = samples[sampleName].body
+    }
+
+
+    function getDecision(subject, action, resource, body, callback, user) {
+        // Runs the callback with arguments (code, data, user) once the request
+        // returns. The user field is used to exfiltrate data across callback
+        // boundaries in certain contexts.
 
         var xhr = new XMLHttpRequest()
         xhr.open("POST", "/submit")
@@ -20,22 +64,39 @@
    "body": "${body}"
 }
 `)
-        xhr.onreadystatechange = function () {
-            if (this.readyState != 4) { return }
+
+        // This nested function stuff is needed because other wise the
+        // user-provided data dosen't make it to the inside of the
+        // onreadystate change callback.
+        xhr.onreadystatechange = (function (user, callback) {
+            return function() {
+                if (this.readyState != 4) { return }
+                callback(this.status, JSON.parse(this.responseText), user)
+            }
+        })(user, callback)
+    }
+
+    function onSubmit() {
+        var subject = document.getElementById("subjectInput").value
+        var action = document.getElementById("actionInput").value
+        var resource = document.getElementById("resourceInput").value
+        var body = document.getElementById("bodyInput").value
+
+        getDecision(subject, action, resource, body, function(code, data, user) {
+
             const resultsDiv = document.getElementById("results")
             resultsDiv.innerHTML = ''
             const resultsH2 = document.createElement("h2")
             resultsH2.innerHTML = "Results"
             resultsDiv.appendChild(resultsH2)
 
-            if (this.status >= 400) {
+            if (code >= 400) {
                 const errorMsg = document.createElement("p")
                 errorMsg.innerHTML = `ERROR: backend returned status code ${this.status}`
                 resultsDiv.appendChild(errorMsg)
                 return
             }
 
-            var data = JSON.parse(this.responseText)
             if (data.error != "") {
                 const errH3 = document.createElement("h3")
                 errH3.innerHTML = "Error"
@@ -57,7 +118,7 @@
             const respCode = document.createElement("code")
             respCode.innerHTML = JSON.stringify(data.response)
             resultsDiv.appendChild(respCode)
-        }
+        }, nil)
     }
 
     function onClear() {
@@ -75,10 +136,84 @@
         resultsDiv.innerHTML = ''
     }
 
+    function onWatch() {
+        // The way this works is we create a row in the "watch table", using
+        // data- attributes to embed information about what we are supposed to
+        // watch. An asynchronous function loops over all of them at regular
+        // intervals and re-requests decisions from the back-end.
+        //
+        // The data-watcher attribute is the unique watcher number, and the
+        // data-watcher-item distinguishes td elements of the same watcher,
+        // being subject, action, resource, body, and allowed respectively.
+
+        var watchDiv = document.getElementById("watching")
+        var watchTable = document.getElementById("watchingTable")
+        var subject = document.getElementById("subjectInput").value
+        var action = document.getElementById("actionInput").value
+        var resource = document.getElementById("resourceInput").value
+        var body = document.getElementById("bodyInput").value
+
+        const watchRow = document.createElement("tr")
+        watchRow.innerHTML =  `<td class=watcher data-watcher=${watchNum} data-watcher-item=subject>${subject}</td>`
+        watchRow.innerHTML += `<td class=watcher data-watcher=${watchNum} data-watcher-item=action>${action}</td>`
+        watchRow.innerHTML += `<td class=watcher data-watcher=${watchNum} data-watcher-item=resource>${resource}</td>`
+        watchRow.innerHTML += `<td class=watcher data-watcher=${watchNum} data-watcher-item=body>${body}</td>`
+        watchRow.innerHTML += `<td class=watcher data-watcher=${watchNum} data-watcher-item=allowed>...</td>`
+
+        watchTable.appendChild(watchRow)
+
+        watchNum += 1
+    }
+
+    function getWatchedAttribute(num, attr) {
+        const node = document.evaluate(`//td[@data-watcher='${num}' and @data-watcher-item='${attr}']`, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue
+        return node.innerHTML
+    }
+
+    function watchUpdater() {
+        // Call this function exactly once to start the watch updater. It will
+        // schedule itself to run at regular intervals.
+
+        // Schedule ourselves to re-run first, in case there is an exception.
+        setTimeout(() => {
+            watchUpdater()
+        }, watcherIntervalMs);
+
+        var xpathIter = document.evaluate("//td[@data-watcher and @data-watcher-item='allowed']", document, null, XPathResult.ANY_TYPE, null)
+        while (true) {
+            var node = xpathIter.iterateNext()
+            if (node == null) { break }
+            var num = Number(node.getAttribute("data-watcher"))
+
+            var subject = getWatchedAttribute(num, "subject")
+            var action = getWatchedAttribute(num, "action")
+            var resource = getWatchedAttribute(num, "resource")
+            var body = getWatchedAttribute(num, "body")
+
+            getDecision(subject, action, resource, body, function(code, data, user) {
+                if (code >= 400) {
+                    user.innerHTML = "ERROR"
+                    console.log(`got error code ${code}, result was: `, data)
+                    return
+                }
+
+                if (data.allowed) {
+                    user.innerHTML = "<p class=allowed>allowed</p>"
+                } else {
+                    user.innerHTML = "<p class=denied>denied</p>"
+                }
+            }, node)
+        }
+
+    }
+
+    watchUpdater()
 </script>
 
 <h1>Entitlements Playground</h1>
     <h2>Request Entry</h2>
+    <div id="requestEntry">
+        <div id="sampleButtons"></div>
         <label>Subject:</label><br />
         <input id="subjectInput" type="text" name="subject"><br />
         <label>Action:</label><br />
@@ -89,5 +224,14 @@
         <input id="bodyInput" type="text" name="body"><br />
         <button type="button" onclick="onSubmit()">Submit</button>
         <button type="button" onclick="onClear()">Clear Form</button>
+        <button type="button" onclick="onWatch()">Watch</button>
+    </div>
 
-<div id="results"/>
+<div id="results"></div>
+
+<div id="watching">
+<h1>Watching</h1>
+<table id="watchingTable">
+    <tr><th>Subject</th><th>Action</th><th>Resource</th><th>Body</th><th>Allowed?</th></tr>
+</table>
+</div>
