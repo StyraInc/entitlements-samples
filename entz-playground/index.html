@@ -2,6 +2,15 @@
 <!-- Use of this source code is governed by an Apache2 -->
 <!-- license that can be found in the LICENSE file. -->
 
+<style>
+.allowed {
+    background-color: green;
+}
+.denied{
+    background-color: red;
+}
+</style>
+
 <script>
     var watchNum = 0
     var lastBundleCount = -1
@@ -139,6 +148,11 @@
 
             const allowedH3 = document.createElement("h3")
             allowedH3.innerHTML = `Allowed: ${data.allowed}`
+            if (data.allowed) {
+                allowedH3.className = "allowed"
+            } else {
+                allowedH3.className = "denied"
+            }
             resultsDiv.appendChild(allowedH3)
 
             const respH3 = document.createElement("h3")
@@ -194,6 +208,7 @@
         watchRow.innerHTML += `<td class=watcher data-watcher=${watchNum} data-watcher-item=body>${body}</td>`
         watchRow.innerHTML += `<td class=watcher data-watcher=${watchNum} data-watcher-item=allowed>...</td>`
         watchRow.innerHTML += `<td class=watcher data-watcher=${watchNum}><button type="button" onclick="deleteWatcher(${watchNum})">remove</button></td>`
+        watchRow.innerHTML += `<td class=watcher data-watcher=${watchNum}><button type="button" onclick="copyWatcher(${watchNum})">copy</button></td>`
 
         watchTable.appendChild(watchRow)
 
@@ -206,6 +221,18 @@
     function deleteWatcher(num) {
         const node = document.evaluate(`//tr[@data-watcher='${num}']`, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue
         node.remove()
+    }
+
+    function copyWatcher(num) {
+        var subject = getWatchedAttribute(num, "subject")
+        var action = getWatchedAttribute(num, "action")
+        var resource = getWatchedAttribute(num, "resource")
+        var body = getWatchedAttribute(num, "body")
+
+        document.getElementById("subjectInput").value = subject
+        document.getElementById("actionInput").value = action
+        document.getElementById("resourceInput").value = resource
+        document.getElementById("bodyInput").value = body
     }
 
     function getWatchedAttribute(num, attr) {
@@ -282,6 +309,6 @@
 <div id="watching">
 <h1>Watching</h1>
 <table id="watchingTable">
-    <tr><th>Subject</th><th>Action</th><th>Resource</th><th>Body</th><th>Allowed?</th><th></th></tr>
+    <tr><th>Subject</th><th>Action</th><th>Resource</th><th>Body</th><th>Allowed?</th><th></th><th></th></tr>
 </table>
 </div>
