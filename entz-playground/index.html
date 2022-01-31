@@ -171,15 +171,23 @@
         var body = document.getElementById("bodyInput").value
 
         const watchRow = document.createElement("tr")
+        watchRow.className = "watcher"
+        watchRow.setAttribute("data-watcher", watchNum)
         watchRow.innerHTML =  `<td class=watcher data-watcher=${watchNum} data-watcher-item=subject>${subject}</td>`
         watchRow.innerHTML += `<td class=watcher data-watcher=${watchNum} data-watcher-item=action>${action}</td>`
         watchRow.innerHTML += `<td class=watcher data-watcher=${watchNum} data-watcher-item=resource>${resource}</td>`
         watchRow.innerHTML += `<td class=watcher data-watcher=${watchNum} data-watcher-item=body>${body}</td>`
         watchRow.innerHTML += `<td class=watcher data-watcher=${watchNum} data-watcher-item=allowed>...</td>`
+        watchRow.innerHTML += `<td class=watcher data-watcher=${watchNum}><button type="button" onclick="deleteWatcher(${watchNum})">remove</button></td>`
 
         watchTable.appendChild(watchRow)
 
         watchNum += 1
+    }
+
+    function deleteWatcher(num) {
+        const node = document.evaluate(`//tr[@data-watcher='${num}']`, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue
+        node.remove()
     }
 
     function getWatchedAttribute(num, attr) {
@@ -249,6 +257,6 @@
 <div id="watching">
 <h1>Watching</h1>
 <table id="watchingTable">
-    <tr><th>Subject</th><th>Action</th><th>Resource</th><th>Body</th><th>Allowed?</th></tr>
+    <tr><th>Subject</th><th>Action</th><th>Resource</th><th>Body</th><th>Allowed?</th><th></th></tr>
 </table>
 </div>
