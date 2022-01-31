@@ -76,6 +76,21 @@
         })(user, callback)
     }
 
+    function highlight(code, language, callback) {
+        var xhr = new XMLHttpRequest()
+        xhr.open("PUT", `/highlight/${language}`)
+        xhr.setRequestHeader("Content-Type", "text/plain")
+        xhr.send(code)
+
+        // This nested function stuff is needed because other wise the
+        // user-provided data dosen't make it to the inside of the
+        // onreadystate change callback.
+        xhr.onreadystatechange = function () {
+                if (this.readyState != 4) { return }
+                callback(this.responseText)
+        }
+    }
+
     function onSubmit() {
         var subject = document.getElementById("subjectInput").value
         var action = document.getElementById("actionInput").value
@@ -115,10 +130,12 @@
             respH3.innerHTML = "Response"
             resultsDiv.appendChild(respH3)
 
-            const respCode = document.createElement("code")
-            respCode.innerHTML = JSON.stringify(data.response)
-            resultsDiv.appendChild(respCode)
-        }, nil)
+            highlight(JSON.stringify(data.response, null, 4), "json", function(resp) {
+                const respCode = document.createElement("code")
+                respCode.innerHTML = resp
+                resultsDiv.appendChild(respCode)
+            })
+        }, null)
     }
 
     function onClear() {

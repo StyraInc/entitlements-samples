@@ -5,6 +5,7 @@
 package playground
 
 import (
+	"bytes"
 	_ "embed"
 	"encoding/json"
 	"io/ioutil"
@@ -14,6 +15,9 @@ import (
 	"net/http"
 	"text/template"
 
+	"github.com/alecthomas/chroma/formatters/html"
+	"github.com/alecthomas/chroma/lexers"
+	"github.com/alecthomas/chroma/styles"
 	"github.com/gorilla/mux"
 )
 
@@ -103,6 +107,43 @@ func LaunchServer(port int) {
 		json.NewEncoder(w).Encode(&resp)
 
 	}).Methods("POST")
+
+	router.HandleFunc("/highlight/{language}", func(w http.ResponseWriter, r *http.Request) {
+		// POST data to this endpoint to get back a syntax-highlighted
+		// HTML fragment.
+
+		language := mux.Vars(r)["language"]
+
+		body, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			jsonError(w, err.Error(), 400)
+			return
+		}
+
+		lexer := lexers.Get(language)
+		style := styles.Get("github")
+		formatter := html.New(
+			html.Standalone(false),
+			html.WithClasses(false),
+		)
+		iterator, err := lexer.Tokenise(nil, string(body))
+		if err != nil {
+			jsonError(w, err.Error(), 400)
+			return
+		}
+
+		buf := new(bytes.Buffer)
+		err = formatter.Format(buf, style, iterator)
+		if err != nil {
+			jsonError(w, err.Error(), 400)
+			return
+		}
+
+		w.WriteHeader(200)
+		w.Header().Set("Content-Type", "text/html")
+		w.Write(buf.Bytes())
+
+	}).Methods("PUT")
 
 	fmt.Printf("index\n%s\n", indexHTMLFile)
 
