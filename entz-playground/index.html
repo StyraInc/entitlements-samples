@@ -4,7 +4,8 @@
 
 <script>
     var watchNum = 0
-    const watcherIntervalMs = 5000
+    var lastBundleCount = -1
+    const watcherIntervalMs = 500
     const samples = {
         "sample 1": {
                 "subject": "alice",
@@ -88,6 +89,20 @@
         xhr.onreadystatechange = function () {
                 if (this.readyState != 4) { return }
                 callback(this.responseText)
+        }
+    }
+
+    function bundle_count(callback) {
+        var xhr = new XMLHttpRequest()
+        xhr.open("GET", "/bundle-count")
+        xhr.send()
+
+        // This nested function stuff is needed because other wise the
+        // user-provided data dosen't make it to the inside of the
+        // onreadystate change callback.
+        xhr.onreadystatechange = function () {
+                if (this.readyState != 4) { return }
+                callback(JSON.parse(this.responseText))
         }
     }
 
@@ -183,6 +198,9 @@
         watchTable.appendChild(watchRow)
 
         watchNum += 1
+
+        // Force a new set of decisions
+        lastBundleCount = -1
     }
 
     function deleteWatcher(num) {
@@ -204,31 +222,38 @@
             watchUpdater()
         }, watcherIntervalMs);
 
-        var xpathIter = document.evaluate("//td[@data-watcher and @data-watcher-item='allowed']", document, null, XPathResult.ANY_TYPE, null)
-        while (true) {
-            var node = xpathIter.iterateNext()
-            if (node == null) { break }
-            var num = Number(node.getAttribute("data-watcher"))
+        bundle_count(function(count) {
+            // Nothing has changed, so we don't need to update anything.
+            if (count == lastBundleCount) { return }
 
-            var subject = getWatchedAttribute(num, "subject")
-            var action = getWatchedAttribute(num, "action")
-            var resource = getWatchedAttribute(num, "resource")
-            var body = getWatchedAttribute(num, "body")
+            lastBundleCount = count
 
-            getDecision(subject, action, resource, body, function(code, data, user) {
-                if (code >= 400) {
-                    user.innerHTML = "ERROR"
-                    console.log(`got error code ${code}, result was: `, data)
-                    return
-                }
+            var xpathIter = document.evaluate("//td[@data-watcher and @data-watcher-item='allowed']", document, null, XPathResult.ANY_TYPE, null)
+            while (true) {
+                var node = xpathIter.iterateNext()
+                if (node == null) { break }
+                var num = Number(node.getAttribute("data-watcher"))
 
-                if (data.allowed) {
-                    user.innerHTML = "<p class=allowed>allowed</p>"
-                } else {
-                    user.innerHTML = "<p class=denied>denied</p>"
-                }
-            }, node)
-        }
+                var subject = getWatchedAttribute(num, "subject")
+                var action = getWatchedAttribute(num, "action")
+                var resource = getWatchedAttribute(num, "resource")
+                var body = getWatchedAttribute(num, "body")
+
+                getDecision(subject, action, resource, body, function(code, data, user) {
+                    if (code >= 400) {
+                        user.innerHTML = "ERROR"
+                        console.log(`got error code ${code}, result was: `, data)
+                        return
+                    }
+
+                    if (data.allowed) {
+                        user.innerHTML = "<p class=allowed>allowed</p>"
+                    } else {
+                        user.innerHTML = "<p class=denied>denied</p>"
+                    }
+                }, node)
+            }
+        })
 
     }
 

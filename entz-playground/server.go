@@ -145,6 +145,15 @@ func LaunchServer(port int) {
 
 	}).Methods("PUT")
 
+	router.HandleFunc("/bundle-count", func(w http.ResponseWriter, r *http.Request) {
+		// Returns a single integer, being the number of times the
+		// bundle has updated.
+
+		w.WriteHeader(200)
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(bundleUpdateCounter)
+	}).Methods("GET")
+
 	fmt.Printf("index\n%s\n", indexHTMLFile)
 
 	err := http.ListenAndServe(fmt.Sprintf(":%d", port), router)

@@ -10,7 +10,9 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
 
+	"github.com/open-policy-agent/opa/plugins/bundle"
 	"github.com/open-policy-agent/opa/sdk"
 )
 
@@ -28,9 +30,26 @@ var rulePath string
 // decision as ALLOW/DENY.
 var allowPath string
 
+// bundleUpdateCounter tracks the number of times the bundle has been updated.
+// This gets exposed to the API, so that the frontend can avoid polling for
+// decisions if nothing has changed.
+var bundleUpdateCounter int = 0
+
 func SetOPA(newOPA *sdk.OPA, ctx context.Context) {
 	opa = newOPA
 	opaContext = ctx
+
+	// NOTE: this variable carries state across calls to the below
+	// callback.
+	lastUpdate := time.Now()
+
+	b := opa.Plugin("bundle").(*bundle.Plugin)
+	b.Register("status_listener", func(status bundle.Status) {
+		if status.LastSuccessfulDownload.After(lastUpdate) {
+			lastUpdate = status.LastSuccessfulDownload
+			bundleUpdateCounter++
+		}
+	})
 }
 
 func SetOPARule(newRule, newAllow string) {
