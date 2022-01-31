@@ -40,6 +40,7 @@
                 sampleButton.setAttribute("onClick", `populateSample("${sampleName}")`)
                 sampleButton.innerHTML = sampleName
                 sampleButtonsDiv.appendChild(sampleButton)
+                sampleButton.className = "sample_button"
         }
     }, 500)
 
@@ -207,8 +208,8 @@
         watchRow.innerHTML += `<td class=watcher data-watcher=${watchNum} data-watcher-item=resource>${resource}</td>`
         watchRow.innerHTML += `<td class=watcher data-watcher=${watchNum} data-watcher-item=body>${body}</td>`
         watchRow.innerHTML += `<td class=watcher data-watcher=${watchNum} data-watcher-item=allowed>...</td>`
-        watchRow.innerHTML += `<td class=watcher data-watcher=${watchNum}><button type="button" onclick="deleteWatcher(${watchNum})">remove</button></td>`
-        watchRow.innerHTML += `<td class=watcher data-watcher=${watchNum}><button type="button" onclick="copyWatcher(${watchNum})">copy</button></td>`
+        watchRow.innerHTML += `<td class=watcher data-watcher=${watchNum}><button class=remove_button type="button" onclick="deleteWatcher(${watchNum})">remove</button></td>`
+        watchRow.innerHTML += `<td class=watcher data-watcher=${watchNum}><button class=copy_button type="button" onclick="copyWatcher(${watchNum})">copy</button></td>`
 
         watchTable.appendChild(watchRow)
 
@@ -252,39 +253,107 @@
         bundle_count(function(count) {
             // Nothing has changed, so we don't need to update anything.
             if (count == lastBundleCount) { return }
-
             lastBundleCount = count
+            onBundleChange()
 
-            var xpathIter = document.evaluate("//td[@data-watcher and @data-watcher-item='allowed']", document, null, XPathResult.ANY_TYPE, null)
-            while (true) {
-                var node = xpathIter.iterateNext()
-                if (node == null) { break }
-                var num = Number(node.getAttribute("data-watcher"))
-
-                var subject = getWatchedAttribute(num, "subject")
-                var action = getWatchedAttribute(num, "action")
-                var resource = getWatchedAttribute(num, "resource")
-                var body = getWatchedAttribute(num, "body")
-
-                getDecision(subject, action, resource, body, function(code, data, user) {
-                    if (code >= 400) {
-                        user.innerHTML = "ERROR"
-                        console.log(`got error code ${code}, result was: `, data)
-                        return
-                    }
-
-                    if (data.allowed) {
-                        user.innerHTML = "<p class=allowed>allowed</p>"
-                    } else {
-                        user.innerHTML = "<p class=denied>denied</p>"
-                    }
-                }, node)
-            }
         })
 
     }
 
+    function onBundleChange() {
+        var xpathIter = document.evaluate("//td[@data-watcher and @data-watcher-item='allowed']", document, null, XPathResult.ANY_TYPE, null)
+        while (true) {
+            var node = xpathIter.iterateNext()
+            if (node == null) { break }
+            var num = Number(node.getAttribute("data-watcher"))
+
+            var subject = getWatchedAttribute(num, "subject")
+            var action = getWatchedAttribute(num, "action")
+            var resource = getWatchedAttribute(num, "resource")
+            var body = getWatchedAttribute(num, "body")
+
+            getDecision(subject, action, resource, body, function(code, data, user) {
+                if (code >= 400) {
+                    user.innerHTML = "ERROR"
+                    console.log(`got error code ${code}, result was: `, data)
+                    return
+                }
+
+                if (data.allowed) {
+                    user.innerHTML = "<p class=allowed>allowed</p>"
+                } else {
+                    user.innerHTML = "<p class=denied>denied</p>"
+                }
+            }, node)
+        }
+
+        // We also want the 'remove', 'copy', and 'sample' buttons to be
+        // able to be enabled and disabled by policies.
+        //
+        // The relevant policy request include only the resource, which
+        // will be a path such as
+        //
+        //     "entz-playground/buttons/samples"
+        //
+        // Or
+        //
+        //     entz-playground/buttons/remove"
+        //
+        // Note that these buttons don't get enabled or disabled
+        // individually, but rather as a group.
+        //
+        // WARNING: this is not a secure way of implementing entitlements -
+        // the data to which access is being controlled lives in the
+        // browser on the client-side, and so does this code. This is a
+        // pretty demo, NOT a demonstration of the correct way to implement
+        // entitlements.
+
+        // sample buttons
+        getDecision(null, null, "/entz-playground/buttons/samples", null, function (code, data, user) {
+                if (code >= 400) {
+                    user.innerHTML = "ERROR"
+                    console.log(`got error code ${code}, result was: `, data)
+                    return
+                }
+                var buttons = document.getElementsByClassName("sample_button")
+                for (var i = 0 ; i < buttons.length; i++) {
+                    buttons[i].disabled = !data.allowed
+                }
+        }, null)
+
+        // copy buttons
+        getDecision(null, null, "/entz-playground/buttons/copy", null, function (code, data, user) {
+                if (code >= 400) {
+                    user.innerHTML = "ERROR"
+                    console.log(`got error code ${code}, result was: `, data)
+                    return
+                }
+                var buttons = document.getElementsByClassName("copy_button")
+                for (var i = 0 ; i < buttons.length; i++) {
+                    buttons[i].disabled = !data.allowed
+                }
+        }, null)
+
+        // remove buttons
+        getDecision(null, null, "/entz-playground/buttons/remove", null, function (code, data, user) {
+                if (code >= 400) {
+                    user.innerHTML = "ERROR"
+                    console.log(`got error code ${code}, result was: `, data)
+                    return
+                }
+                var buttons = document.getElementsByClassName("remove_button")
+                for (var i = 0 ; i < buttons.length; i++) {
+                    buttons[i].disabled = !data.allowed
+                }
+        }, null)
+    }
+
     watchUpdater()
+
+    // Go ahead and update the button state after the page first loads.
+    setTimeout(() => {
+        onBundleChange()
+    }, 500);
 </script>
 
 <h1>Entitlements Playground</h1>
