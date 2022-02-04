@@ -170,7 +170,6 @@ func main() {
 	r := mux.NewRouter().StrictSlash(false)
 	carsRouter := r.PathPrefix("/cars")
 	carsRouter.Handler(sample.NewEntitlementsHandler(decider, sample.GetAPIHandler()))
-	//r.Handle("/cars{.*}", sample.NewEntitlementsHandler(decider, sample.GetAPIHandler()))
 
 	if CLI.Playground {
 		fmt.Printf("Enabling playground...\n")
@@ -181,7 +180,6 @@ func main() {
 
 		playgroundRouter := r.PathPrefix("/")
 		playgroundRouter.Handler(playground.GetAPIHandler())
-		//r.Handle("/{.*}", playground.GetAPIHandler())
 	}
 
 	err = http.ListenAndServe(fmt.Sprintf(":%d", CLI.Port), r)
