@@ -46,28 +46,15 @@ func jsonError(w http.ResponseWriter, message string, code int) {
 	http.Error(w, string(b), code)
 }
 
-func LaunchServer(port int) {
+// GetAPIHandler creates a router for the playground.
+func GetAPIHandler() http.Handler {
 	tmpl := template.New("index.html")
 	template.Must(tmpl.Parse(indexHTMLFile))
 
 	router := mux.NewRouter()
 
 	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			tmpl.Execute(w, nil)
-			return
-		}
-
-		data := FormInput{
-			Subject:  r.FormValue("subject"),
-			Action:   r.FormValue("action"),
-			Resource: r.FormValue("resource"),
-			Body:     r.FormValue("body"),
-		}
-
-		fmt.Printf("form response: %v\n", data)
-
-		tmpl.Execute(w, struct{ Success bool }{true})
+		tmpl.Execute(w, nil)
 	})
 
 	router.HandleFunc("/submit", func(w http.ResponseWriter, r *http.Request) {
@@ -156,8 +143,5 @@ func LaunchServer(port int) {
 
 	fmt.Printf("index\n%s\n", indexHTMLFile)
 
-	err := http.ListenAndServe(fmt.Sprintf(":%d", port), router)
-	if err != nil {
-		panic(err)
-	}
+	return router
 }

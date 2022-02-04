@@ -106,6 +106,10 @@ func pretty(obj interface{}) string {
 }
 
 // (response in JSON, allowed?, error)
+//
+// In principle, it would be better to use the entz abstractions in the sample
+// package, however we already need to have direct access to the Go SDK so we
+// can bind to bundle update events.
 func response(input *FormInput) (interface{}, bool, error) {
 
 	log.Printf("Asking OPA for a decision on %v\n", input)

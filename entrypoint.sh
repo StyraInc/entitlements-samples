@@ -92,8 +92,8 @@ LAUNCH_OPA=YES
 
 # Detect the sample app and set our configuration appropriately.
 if [ "$SAMPLE_APP" = "go-httpsample" ] ; then
-	TARGET_DIR=/src/entitlements-samples/go-httpsample
-	RUN_COMMAND="./carinfoserver --port $API_PORT --opa '$OPA_URL'"
+	TARGET_DIR=/src/entitlements-samples/go-sample
+	RUN_COMMAND="./carinfoserver --mode http --port $API_PORT --opa '$OPA_URL'"
 
 
 elif [ "$SAMPLE_APP" = "python-httpsample" ] ; then
@@ -101,17 +101,13 @@ elif [ "$SAMPLE_APP" = "python-httpsample" ] ; then
 	RUN_COMMAND="python3 server.py --port $API_PORT --opa '$OPA_URL'"
 
 elif [ "$SAMPLE_APP" = "go-sdksample" ] ; then
-	TARGET_DIR=/src/entitlements-samples/go-sdksample
-	# NOTE: the rule path, and the allow path for within that rule, are
-	# left at their defaults.
-	RUN_COMMAND="./carinfoserver --port $API_PORT --config '$TARGET_DIR/opa-conf.yaml'"
+	TARGET_DIR=/src/entitlements-samples/go-sample
+	RUN_COMMAND="./carinfoserver --mode sdk --port $API_PORT --config '$TARGET_DIR/opa-conf.yaml'"
 	LAUNCH_OPA=NO
 
 elif [ "$SAMPLE_APP" = "entz-playground" ] ; then
-	TARGET_DIR=/src/entitlements-samples/entz-playground
-	# NOTE: the rule path, and the allow path for within that rule, are
-	# left at their defaults.
-	RUN_COMMAND="./entz-playground --port $API_PORT --config '$TARGET_DIR/opa-conf.yaml'"
+	TARGET_DIR=/src/entitlements-samples/go-sample
+	RUN_COMMAND="./carinfoserver --mode sdk --playground --port $API_PORT --config '$TARGET_DIR/opa-conf.yaml'"
 	LAUNCH_OPA=NO
 
 else
