@@ -27,6 +27,30 @@
                 "action": "GET",
                 "resource": "/cars/car0",
                 "body": ""
+        },
+        "sample 3": {
+                "subject": "bob",
+                "action": "POST",
+                "resource": "/cars",
+                "body": ""
+        },
+        "playground sample buttons": {
+                "subject": "",
+                "action": "",
+                "resource": "/entz-playground/buttons/samples",
+                "body": ""
+        },
+        "playground copy buttons": {
+                "subject": "",
+                "action": "",
+                "resource": "/entz-playground/buttons/copy",
+                "body": ""
+        },
+        "playground remove buttons": {
+                "subject": "",
+                "action": "",
+                "resource": "/entz-playground/buttons/remove",
+                "body": ""
         }
     }
 
@@ -357,6 +381,31 @@
 </script>
 
 <h1>Entitlements Playground</h1>
+    <h2>Instructions</h2>
+
+    <p>Welcome to the Entitlements Playground! This tool will allow you to
+    experiment with different requests using the Entitlements object model by
+    filling in the form fields below and then pressing the "Submit" button. Try
+    using the row of sample buttons above the form to pre-populate the fields
+    with some example values!</p>
+
+    <p>You can also "watch" a request. When you click the "Watch" button below,
+    the request data will be stored in the "Watching" table below. The
+    "Allowed?" column will update in real-time according to policy changes made
+    in the DAS to show whether that request would be allowed or denied. You can
+    use the "Copy" button to copy a row back into the form fields, allowing you
+    to "Submit" it again and see the full response from the DAS. The "Remove"
+    button will delete the row from the table.</p>
+
+    <p>The sample buttons above the form, as well as the "Copy" and "Remove"
+    buttons for each row in the "Watching" table are controlled by Entitlements
+    policies. Each group of buttons can be enabled or disabled by creating a
+    policy to allow or deny access to the
+    <code>/entz-playground/buttons/samples</code>,
+    <code>/entz-playground/buttons/copy</code>, or
+    <code>/entz-playground/buttons/remove</code> respectively. </p>
+
+
     <h2>Request Entry</h2>
     <div id="requestEntry">
         <div id="sampleButtons"></div>
