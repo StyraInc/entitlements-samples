@@ -4,27 +4,10 @@
 # Use of this source code is governed by an Apache2
 # license that can be found in the LICENSE file.
 
+# For information on influential environment variables, see the README.
+
 set -e
 set -u
-
-# We require the following environment variables:
-#
-# DAS_TOKEN - the token to be use when retrieving the OPA configuration
-# DAS_SYSTEM - DAS system ID we are to pull from
-# DAS_URL - the full URL of the DAS tenant we are to pull the system down from
-# SAMPLE_APP - the name of the sample app to run
-#
-# The following additional environment variables are significant:
-#
-# API_PORT - port on which the API server should run (default: 8123)
-# DOCS_PORT - port on which the API documentation server should run (default:
-#	8080)
-# TEST - if set to any non-empty value, automatically run the API tests in the
-#	interactive console
-#
-# valid sample apps are:
-#
-# * "go-httpsample"
 
 # Validate required environment variables.
 set +u

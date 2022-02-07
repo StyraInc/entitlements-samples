@@ -3,9 +3,50 @@
 This repository contains examples of using the Entitlements feature of Styra
 DAS in various languages and settings.
 
+## How to Run
+
+TODO: write instructions on how to run
+
+Sample applications:
+
+* `python-httpsample` - the [python sample using OPA as a sidecar over
+  http](./python-httpsample).
+* `go-httpsample` - the [go sample](./go-sample) running in OPA sidecar mode.
+* `go-sdksample` - the [go sample](./go-sample) running OPA as an embedded Go
+  library via the OPA SDK ("SDK mode").
+* `entz-playground` - the [go sample](./go-sample) running in SDK mode, with
+  the "entitlements playground" web interface enabled.
+
+### Influential Environment Variables
+
+You can use the following environment variables to influence the behavior of
+the container via `-e`.
+
+These environment variables **must** be set for the container to work:
+
+* `DAS_TOKEN` - the token to be used for retrieving the OPA configuration from
+  the DAS.
+* `DAS_SYSTEM` - the DAS system ID we should pull rules from.
+* `DAS_URL` - the full URL of the DAS instance we are to pull the system down
+  from.
+* `SAMPLE_APP` - which of the sample applications to run. See previous section
+  for choices.
+
+These environment variables may be specified, but have default values (shown in
+parenthesis) if they are omitted:
+
+* `API_PORT` (8123) - the port on which the API server for the sample should
+  listen. When using the "entitlements playground", it is served on this port
+  as well.
+* `DOCS_PORT` (8080) - the port on which the API documentation server should
+  listen.
+* `TEST` - if this variable is set to any non-empty value, then the test suite
+  is run against the chosen sample app. This variable is normally used only
+  during sample development.
+
 ## Exercises
 
-TODO: put in some helpful exercises for the user to runt hrough.
+TODO: put in some helpful exercises for the user to run through.
 
 ```sh
 curl -Ss localhost:8123/cars -H "user: alice"
