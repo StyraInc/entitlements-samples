@@ -35,6 +35,8 @@ var allowPath string
 // decisions if nothing has changed.
 var bundleUpdateCounter int = 0
 
+var bundleUpdateTimestamp time.Time = time.Now()
+
 func SetOPA(newOPA *sdk.OPA, ctx context.Context) {
 	opa = newOPA
 	opaContext = ctx
@@ -48,6 +50,7 @@ func SetOPA(newOPA *sdk.OPA, ctx context.Context) {
 		if status.LastSuccessfulDownload.After(lastUpdate) {
 			lastUpdate = status.LastSuccessfulDownload
 			bundleUpdateCounter++
+			bundleUpdateTimestamp = time.Now()
 		}
 	})
 }

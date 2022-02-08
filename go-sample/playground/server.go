@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"log"
+	"time"
 
 	"fmt"
 	"net/http"
@@ -139,6 +140,15 @@ func GetAPIHandler() http.Handler {
 		w.WriteHeader(200)
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(bundleUpdateCounter)
+	}).Methods("GET")
+
+	router.HandleFunc("/bundle-time", func(w http.ResponseWriter, r *http.Request) {
+		// Returns the time at which the bundle was last updated as a
+		// string.
+
+		w.WriteHeader(200)
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(bundleUpdateTimestamp.Format(time.RFC822))
 	}).Methods("GET")
 
 	fmt.Printf("index\n%s\n", indexHTMLFile)

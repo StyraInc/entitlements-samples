@@ -6,7 +6,16 @@
 .allowed {
     background-color: green;
 }
-.denied{
+.denied {
+    background-color: red;
+}
+.timedelta_short {
+    background-color: green;
+}
+.timedelta_medium {
+    background-color: orange;
+}
+.timedelta_long {
     background-color: red;
 }
 </style>
@@ -15,6 +24,8 @@
     var watchNum = 0
     var lastBundleCount = -1
     const watcherIntervalMs = 500
+    const timedelta_medium = 60*2
+    const timedelta_long = 60*5
     const samples = {
         "sample 1": {
                 "subject": "alice",
@@ -129,6 +140,20 @@
     function bundle_count(callback) {
         var xhr = new XMLHttpRequest()
         xhr.open("GET", "/bundle-count")
+        xhr.send()
+
+        // This nested function stuff is needed because other wise the
+        // user-provided data dosen't make it to the inside of the
+        // onreadystate change callback.
+        xhr.onreadystatechange = function () {
+                if (this.readyState != 4) { return }
+                callback(JSON.parse(this.responseText))
+        }
+    }
+
+    function bundle_timestamp(callback) {
+        var xhr = new XMLHttpRequest()
+        xhr.open("GET", "/bundle-time")
         xhr.send()
 
         // This nested function stuff is needed because other wise the
@@ -370,6 +395,39 @@
                     buttons[i].disabled = !data.allowed
                 }
         }, null)
+
+        // update the bundle timestamp
+        bundle_timestamp(function(ts) {
+            var timestampDiv = document.getElementById("bundleUpdateTimestamp")
+            d = new Date(ts)
+            timestampDiv.innerHTML = String(d)
+        })
+    }
+
+    function timeUpdater() {
+        // Schedule ourselves to re-run first, in case there is an exception.
+        setTimeout(() => {
+            timeUpdater()
+        }, 1000);
+
+        var timestampDiv = document.getElementById("bundleUpdateTimestamp")
+        var deltaDiv = document.getElementById("bundleUpdateDelta")
+        // Until the first time we get a bundle timestamp, this will
+        // throw an exception. That's OK though, since we already
+        // scheduled ourself to run again later.
+        bundleTime = new Date(timestampDiv.innerHTML)
+        var delta = Math.round(((new Date()) - bundleTime) / 1000)
+        deltaDiv.innerHTML = `${delta} seconds ago`
+
+        // Update the CSS class of our div to color code based on how long it's
+        // been since we got a bundle update.
+        deltaDiv.className = "timedelta_short"
+        if (delta > timedelta_medium) {
+            deltaDiv.className = "timedelta_medium"
+        }
+        if (delta > timedelta_long) {
+            deltaDiv.className = "timedelta_long"
+        }
     }
 
     watchUpdater()
@@ -378,6 +436,12 @@
     setTimeout(() => {
         onBundleChange()
     }, 500);
+
+    // Wait a bit before showing the 'seconds ago', to give us time to
+    // actually get the last bundle update time.
+    setTimeout(() => {
+        timeUpdater()
+    }, 2000);
 </script>
 
 <h1>Entitlements Playground</h1>
@@ -405,18 +469,30 @@
     <code>/entz-playground/buttons/copy</code>, or
     <code>/entz-playground/buttons/remove</code> respectively. </p>
 
+    <h2>Last Bundle Update</h2>
+
+    <p>Each time the backing OPA instance receives a bundle update from DAS,
+    the timer below will update. Note that this value may be off by up to +/-
+    30 seconds. This value only changes when the policy has actually changed,
+    so keep in mind that if this timestamp doesn't change, that does not imply
+    a problem unless someone changed the policy in DAS.</p>
+
+    <div id="bundleUpdateTimestamp">no bundle updates so far...</div>
+
+    <div id="bundleUpdateDelta"></div>
+
 
     <h2>Request Entry</h2>
     <div id="requestEntry">
         <div id="sampleButtons"></div>
         <label>Subject:</label><br />
-        <input id="subjectInput" type="text" name="subject"><br />
+        <input width=500 id="subjectInput" type="text" name="subject"><br />
         <label>Action:</label><br />
-        <input id="actionInput" type="text" name="action"><br />
+        <input width=500 id="actionInput" type="text" name="action"><br />
         <label>Resource:</label><br />
-        <input id="resourceInput" type="text" name="resource"><br />
+        <input width=500 id="resourceInput" type="text" name="resource"><br />
         <label>Body:</label><br />
-        <input id="bodyInput" type="text" name="body"><br />
+        <input width=500 id="bodyInput" type="text" name="body"><br />
         <button type="button" onclick="onSubmit()">Submit</button>
         <button type="button" onclick="onClear()">Clear Form</button>
         <button type="button" onclick="onWatch()">Watch</button>
