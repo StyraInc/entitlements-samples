@@ -44,15 +44,24 @@ cd /src/entitlements-samples
 
 # Serve the CarInfoStore API docs.
 printf "launching documentation server... "
-redoc-cli serve --port $DOCS_PORT ./carinfostore.yml > /var/log/redoc.log 2>&1 &
-sleep 1
-if ! ps aux | grep -v grep | grep -q redoc-cli ; then
-	echo "FAIL"
-	echo "redoc-cli is not running. Printing redoc-cli logs and exiting..."
-	echo "--------"
-	cat /var/log/redoc.log
-	exit 1
-fi
+#redoc-cli serve --port $DOCS_PORT ./carinfostore.yml > /var/log/redoc.log 2>&1 &
+
+# XXX: temporary hack because redoc-cli broke
+redoc-cli bundle carinfostore.yml   # redirecting this to a log file breaks it for some reason??
+mkdir /tmp/docs
+mv redoc-static.html /tmp/docs/index.html
+cd /tmp/docs/
+python3 -m http.server 8080 >> /var/log/redoc.log 2>&1 &
+cd /src/entitlements-samples
+
+#sleep 1
+#if ! ps aux | grep -v grep | grep -q redoc-cli ; then
+#        echo "FAIL"
+#        echo "redoc-cli is not running. Printing redoc-cli logs and exiting..."
+#        echo "--------"
+#        cat /var/log/redoc.log
+#        exit 1
+#fi
 echo "DONE"
 
 
