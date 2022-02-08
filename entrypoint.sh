@@ -9,6 +9,20 @@
 set -e
 set -u
 
+# We need to be running in an interactive terminal or else tmux will fail.
+#
+# Note that it dosen't seem possible to detect the case where the user runs
+# Docker with -i only, since the TTY has in fact been allocated in that case.
+if [ ! -t 0 ] ; then
+	echo "standard input does not appear to be an interactive tty, please run docker with '-it'"
+	exit 1
+fi
+
+if [ ! -t 1 ] ; then
+	echo "standard output does not appear to be an interactive tty, please run docker with '-it'"
+	exit 1
+fi
+
 # Validate required environment variables.
 set +u
 if [ -z "$DAS_TOKEN" ] ; then
