@@ -33,9 +33,8 @@ fi
 
 # Set default values for optional environment variables.
 if [ -z "$API_PORT" ] ; then API_PORT=8123 ; fi
-set -e
 if [ -z "$DOCS_PORT" ] ; then DOCS_PORT=8080; fi
-set -e
+set -u
 
 # Update the OAPIv3.1 spec to report the correct port.
 sed -i 's/http:\/\/localhost:8123/http:\/\/localhost:'"$API_PORT"'/g' /src/entitlements-samples/carinfostore.yml
@@ -131,10 +130,12 @@ if [ "$LAUNCH_OPA" = "YES" ] ; then
 fi
 
 printf "launching $SAMPLE_APP... "
+set +u
 if [ -z "$TEST" ] ; then
 	# the test scripts wants a blank database
 	cp /src/entitlements-samples/data.json ./
 fi
+set -u
 sh -c "$RUN_COMMAND" >> /var/log/carinfoserver.log 2>&1 &
 echo "DONE"
 
@@ -145,9 +146,11 @@ export STARTDIR="$TARGET_DIR"
 export INJECT_COMMANDS="alias curl='curl -w \"\\n\"'"
 export WELCOME="/src/entitlements-samples/welcome.txt"
 
+set +u
 if [ ! -z "$TEST" ] ; then
 	sh -c "sleep 2 ; tmux send-keys \"pytest /src/entitlements-samples/tests\" Enter" &
 fi
+set -u
 
 if [ "$LAUNCH_OPA" = "YES" ] ; then
 	sh /src/entitlements-samples/splitwatcher.sh /var/log/opa-server.log /var/log/carinfoserver.log
