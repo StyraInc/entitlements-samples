@@ -95,15 +95,6 @@ parenthesis) if they are omitted:
   is run against the chosen sample app. This variable is normally used only
   during sample development.
 
-## Exercises
-
-TODO: put in some helpful exercises for the user to run through.
-
-```sh
-curl -Ss localhost:8123/cars -H "user: alice"
-```
-
-
 ## Tests
 
 To run the test suite, simply issue a normal `docker run` command, but add `-e
