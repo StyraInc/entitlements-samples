@@ -5,9 +5,60 @@ DAS in various languages and settings.
 
 ## How to Run
 
-TODO: write instructions on how to run
+This repository contains several different sample applications (listed below)
+which demonstrate various methods by which to integrate OPA with your
+application in various languages. For convenience, all of these sample
+applications are bundled into a single docker image, and which application is
+launched depends on the setting of the `SAMPLE_APP` environment variable (see
+*Influential Environment Variables*).
 
-Sample applications:
+Additionally, various environment variables need to be set which can be
+retrieved from a DAS instance (tip: you can create your own DAS instance for
+free via [this link](https://www.styra.com/das-free?hsLang=en)).
+
+To get started, you need to first download the Docker image, or build it
+locally.
+
+To build locally:
+
+```
+$ docker build -t entitlements-samples .
+```
+
+To download the image:
+
+```
+$ docker pull ...
+```
+
+**TODO**: add instructions for downloading the image once we have a published
+image.
+
+An example of running the Python sample application would be:
+
+```
+$ docker run -it \
+	-p 8080:8080 -p 8123:8123 -e DOCS_PORT=8080 -e API_PORT=8123 \
+	-e SAMPLE_APP=python-httpsample \
+	-e DAS_TOKEN='CHANGEME' \
+	-e DAS_URL='https://CHANGEME.styra.com/' \
+	-e DAS_SYSTEM='CHANGEME' \
+	entitlements-samples
+```
+
+You can determine your DAS system ID (`DAS_SYSTEM`) by looking in the top-left
+corner of the screen while you have the system in question selected in the DAS,
+it should be a long sequence of letters and numbers such as
+`ca8cef0d13134065bd7481f56f05537c`.
+
+You can create a token (`DAS_TOKEN`) via Workspace->Settings->API Tokens.
+
+Alternatively, if you view the quickstart for the "Entitlements" system type,
+your DAS instance will automatically generate you an appropriate `docker run`
+command with the necessary environment variables pre-filled (feel free to
+change the `SAMPLE_APP` variable to try out different samples).
+
+The sample applications that you can choose from are:
 
 * `python-httpsample` - the [python sample using OPA as a sidecar over
   http](./python-httpsample).
