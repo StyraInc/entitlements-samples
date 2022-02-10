@@ -445,26 +445,28 @@
 </script>
 
 <h1>Entitlements Playground</h1>
+
     <h2>Instructions</h2>
 
-    <p>Welcome to the Entitlements Playground! This tool will allow you to
-    experiment with different requests using the Entitlements object model by
-    filling in the form fields below and then pressing the "Submit" button. Try
-    using the row of sample buttons above the form to pre-populate the fields
-    with some example values!</p>
+    <p>Welcome to the Entitlements Playground! This tool allows you to
+    experiment with different requests using the Entitlements object model.
+    Start filling the form fields below and then click the <b>Submit</b> button
+    to work on the object model. Try using the row of sample buttons above the
+    form to pre-populate the fields with some example values.</p>
 
-    <p>You can also "watch" a request. When you click the "Watch" button below,
-    the request data will be stored in the "Watching" table below. The
-    "Allowed?" column will update in real-time according to policy changes made
-    in the DAS to show whether that request would be allowed or denied. You can
-    use the "Copy" button to copy a row back into the form fields, allowing you
-    to "Submit" it again and see the full response from the DAS. The "Remove"
-    button will delete the row from the table.</p>
+    <p>You can also watch a request. When you click the <b>Watch</b> button
+    below, the request data will be stored in the <b>Watching</b> table below.
+    The <b>Allowed?</b> column will update in real-time according to policy
+    changes made in the DAS to show whether that request would be allowed or
+    denied. You can use the <b>Copy</b> button to copy a row back into the form
+    fields, allowing you to <b>Submit</b> it again and see the full response
+    from the DAS. The <b>Remove</b> button will delete the row from the
+    table.</p>
 
-    <p>The sample buttons above the form, as well as the "Copy" and "Remove"
-    buttons for each row in the "Watching" table are controlled by Entitlements
-    policies. Each group of buttons can be enabled or disabled by creating a
-    policy to allow or deny access to the
+    <p>The sample buttons above the form, and the <b>Copy</b> and <b>Remove</b>
+    buttons for each row in the <b>Watching</b> table are controlled by
+    Entitlements policies. Each group of buttons can be enabled or disabled by
+    creating a policy to allow or deny access to the
     <code>/entz-playground/buttons/samples</code>,
     <code>/entz-playground/buttons/copy</code>, or
     <code>/entz-playground/buttons/remove</code> respectively. </p>
@@ -472,12 +474,17 @@
     <h2>Last Bundle Update</h2>
 
     <p>Each time the backing OPA instance receives a bundle update from DAS,
-    the timer below will update. Note that this value may be off by up to +/-
-    30 seconds. This value only changes when the policy has actually changed,
-    so keep in mind that if this timestamp doesn't change, that does not imply
-    a problem unless someone changed the policy in DAS.</p>
+    the timer below will update.
 
-    <div id="bundleUpdateTimestamp">no bundle updates so far...</div>
+    <div class="note">
+    <p><strong>Note</strong> This value may be off by up to +/-
+    30 seconds and changes only when the policy has actually changed.
+    Remember that if this timestamp doesn't change, that does not imply
+    a problem, unless someone changed the policy in DAS.</p>
+    </div>
+    </p>
+
+    <div id="bundleUpdateTimestamp">No bundle updates so far...</div>
 
     <div id="bundleUpdateDelta"></div>
 
