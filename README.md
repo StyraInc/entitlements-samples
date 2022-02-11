@@ -22,17 +22,14 @@ locally.
 To build locally:
 
 ```
-$ docker build -t entitlements-samples .
+$ docker build -t styraautomation/entitlements-samples:vlocal .
 ```
 
-To download the image:
+To download the image (**substantially faster**):
 
 ```
-$ docker pull ...
+$ docker pull styraautomation/entitlements-samples:latest
 ```
-
-**TODO**: add instructions for downloading the image once we have a published
-image.
 
 An example of running the Python sample application would be:
 
@@ -43,8 +40,12 @@ $ docker run -it \
 	-e DAS_TOKEN='CHANGEME' \
 	-e DAS_URL='https://CHANGEME.styra.com/' \
 	-e DAS_SYSTEM='CHANGEME' \
-	entitlements-samples
+	styraautomation/entitlements-samples:latest
 ```
+
+Use `styraautomation/entitlements-samples:vlocal` instead of
+`styraautomation/entitlements-samples:latest` if you used `docker build`
+previously.
 
 You can determine your DAS system ID (`DAS_SYSTEM`) by looking in the top-left
 corner of the screen while you have the system in question selected in the DAS,
