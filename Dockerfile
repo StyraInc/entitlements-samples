@@ -20,8 +20,6 @@ ARG DEBIAN_FRONTEND=noninteractive
 # up-to-date version of the Go compiler, since the one Ubuntu ships is too old
 # for us.
 #
-# build-essential, git, and golang-go are all require to build OPA itself
-#
 # python3 and python3-pip are used for the Python example.
 #
 # tmux is needed for splitwatcher.
@@ -36,20 +34,16 @@ RUN apt-get update && \
 	yes | add-apt-repository ppa:longsleep/golang-backports && \
 	apt-get update && \
 	apt-get -qq upgrade --yes && \
-	apt-get -qq --yes install build-essential curl git golang-go jq python3 python3-pip tmux vim-tiny nano tcpdump npm && \
+	apt-get -qq --yes install curl git golang-go jq python3 python3-pip tmux vim-tiny nano tcpdump npm && \
 	sh -c "ln -s '$(which vim.tiny)' /usr/local/bin/vim"
 
-# We will build OPA from source rather than downloading the release binary.
-# This is done in order to provide compatibility with M1 Macs. Although the
-# AMD64 release binary will run on the M1 via Rosetta, it cannot run inside a
-# docker container, which is a virtualized AARCH64 Linux instance.
-RUN mkdir -p /src && \
-	cd /src/ && \
-	git clone https://github.com/open-policy-agent/opa.git && \
-	cd opa && \
-	git checkout v0.36.0 && \
-	make install && \
-	cp /root/go/bin/opa /usr/local/bin/opa
+# Install OPA from static binary according to the detected CPU arch.
+RUN OPA_VERSION=v0.37.2 && \
+    URL="ERROR" && \
+    if   [ "$(arch)" = "aarch64" ] ; then URL="https://github.com/open-policy-agent/opa/releases/download/$OPA_VERSION/opa_linux_arm64_static" ; \
+    elif [ "$(arch)" = "x86_64"  ] ; then URL="https://github.com/open-policy-agent/opa/releases/download/$OPA_VERSION/opa_linux_amd64_static"  ; \
+    else echo "Don't know where to get OPA for architecture '$(arch)'" ; exit 1 ; fi && \
+    curl -LSs -o /usr/local/bin/opa "$URL" && chmod +x /usr/local/bin/opa
 
 # Install an updated version of node. This is required to run redoc. Then
 # install redoc itself.
