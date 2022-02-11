@@ -16,10 +16,6 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 # software-properties-common is required to get the add-apt-repository command
 #
-# ppa:longlseep/golang-backports gives us a convienient way to install and
-# up-to-date version of the Go compiler, since the one Ubuntu ships is too old
-# for us.
-#
 # python3 and python3-pip are used for the Python example.
 #
 # tmux is needed for splitwatcher.
@@ -29,27 +25,26 @@ ARG DEBIAN_FRONTEND=noninteractive
 #
 # The other programs installed for convienience if we need to shell in to the
 # container for debugging.
+#
+# The an updated version of node is required to run redoc.
 RUN apt-get update && \
-	apt-get -qq --yes install software-properties-common && \
-	yes | add-apt-repository ppa:longsleep/golang-backports && \
-	apt-get update && \
-	apt-get -qq upgrade --yes && \
-	apt-get -qq --yes install curl git golang-go jq python3 python3-pip tmux vim-tiny nano tcpdump npm && \
-	sh -c "ln -s '$(which vim.tiny)' /usr/local/bin/vim"
+	apt-get -qq --yes install curl git jq python3 python3-pip tmux vim-tiny nano tcpdump && \
+	sh -c "ln -s '$(which vim.tiny)' /usr/local/bin/vim" && \
+	git clone https://github.com/udhos/update-golang && \
+	cd update-golang && ./update-golang.sh && ln -s /usr/local/go/bin/go /usr/local/bin/go && \
+	cd .. && rm -rf ./update-golang && \
+	curl -sL https://deb.nodesource.com/setup_16.x | bash && \
+	apt-get -qq --yes install nodejs && \
+	npm i -g redoc-cli
 
 # Install OPA from static binary according to the detected CPU arch.
 RUN OPA_VERSION=v0.37.2 && \
-    URL="ERROR" && \
-    if   [ "$(arch)" = "aarch64" ] ; then URL="https://github.com/open-policy-agent/opa/releases/download/$OPA_VERSION/opa_linux_arm64_static" ; \
-    elif [ "$(arch)" = "x86_64"  ] ; then URL="https://github.com/open-policy-agent/opa/releases/download/$OPA_VERSION/opa_linux_amd64_static"  ; \
-    else echo "Don't know where to get OPA for architecture '$(arch)'" ; exit 1 ; fi && \
-    curl -LSs -o /usr/local/bin/opa "$URL" && chmod +x /usr/local/bin/opa
+	URL="ERROR" && \
+	if   [ "$(arch)" = "aarch64" ] ; then URL="https://github.com/open-policy-agent/opa/releases/download/$OPA_VERSION/opa_linux_arm64_static" ; \
+	elif [ "$(arch)" = "x86_64"  ] ; then URL="https://github.com/open-policy-agent/opa/releases/download/$OPA_VERSION/opa_linux_amd64_static"  ; \
+	else echo "Don't know where to get OPA for architecture '$(arch)'" ; exit 1 ; fi && \
+	curl -LSs -o /usr/local/bin/opa "$URL" && chmod +x /usr/local/bin/opa
 
-# Install an updated version of node. This is required to run redoc. Then
-# install redoc itself.
-RUN curl -sL https://deb.nodesource.com/setup_16.x | bash && \
-    apt-get -qq --yes install nodejs && \
-    npm i -g redoc-cli
 
 # Copy in the source code for our samples, plus the entrypoint script
 RUN mkdir -p /src/entitlements-samples/go-sample && \
