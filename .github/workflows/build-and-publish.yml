@@ -9,6 +9,7 @@ jobs:
   docker-push:
     name: Build Docker image and push to repositories
     runs-on: ubuntu-latest
+    environment: docker-builder
 
     steps:
       - name: Checkout code
