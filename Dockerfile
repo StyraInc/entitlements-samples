@@ -28,7 +28,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 #
 # The an updated version of node is required to run redoc.
 RUN apt-get update && \
-	apt-get -qq --yes install curl git jq python3 python3-pip tmux vim-tiny nano tcpdump && \
+	apt-get -qq --yes install --no-install-recommends curl git jq python3 python3-pip tmux vim-tiny nano tcpdump && \
 	apt-get -qq --yes clean && \
 	sh -c "ln -s '$(which vim.tiny)' /usr/local/bin/vim" && \
 	git clone https://github.com/udhos/update-golang && \
@@ -37,7 +37,8 @@ RUN apt-get update && \
 	curl -sL https://deb.nodesource.com/setup_16.x | bash && \
 	apt-get -qq --yes install nodejs && \
 	npm i -g redoc-cli && \
-	npm cache clean --force
+	npm cache clean --force && \
+	rm -f /usr/local/*.tar.gz
 
 # Install OPA from static binary according to the detected CPU arch.
 RUN OPA_VERSION=v0.37.2 && \
