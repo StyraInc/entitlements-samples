@@ -29,13 +29,15 @@ ARG DEBIAN_FRONTEND=noninteractive
 # The an updated version of node is required to run redoc.
 RUN apt-get update && \
 	apt-get -qq --yes install curl git jq python3 python3-pip tmux vim-tiny nano tcpdump && \
+	apt-get -qq --yes clean && \
 	sh -c "ln -s '$(which vim.tiny)' /usr/local/bin/vim" && \
 	git clone https://github.com/udhos/update-golang && \
 	cd update-golang && ./update-golang.sh && ln -s /usr/local/go/bin/go /usr/local/bin/go && \
 	cd .. && rm -rf ./update-golang && \
 	curl -sL https://deb.nodesource.com/setup_16.x | bash && \
 	apt-get -qq --yes install nodejs && \
-	npm i -g redoc-cli
+	npm i -g redoc-cli && \
+	npm cache clean --force
 
 # Install OPA from static binary according to the detected CPU arch.
 RUN OPA_VERSION=v0.37.2 && \
@@ -64,10 +66,12 @@ COPY tests/ /src/entitlements-samples/tests
 # sample app (which will pull in it's deps automatically).
 #
 # pytest and pytest-order are needed to run the test suite.
-RUN pip3 install -r /src/entitlements-samples/python-httpsample/requirements.txt && \
+RUN pip3 --no-cache-dir install -r /src/entitlements-samples/python-httpsample/requirements.txt && \
 	cd /src/entitlements-samples/go-sample && \
 	go mod tidy && \
 	go build -o carinfoserver ./cmd/carinfoserver && \
-	pip3 install pytest pytest-order
+	pip3 --no-cache-dir install pytest pytest-order && \
+	go clean -cache -modcache -i -r
+
 
 CMD ["sh", "/src/entitlements-samples/entrypoint.sh"]
