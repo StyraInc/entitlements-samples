@@ -35,8 +35,8 @@ jobs:
         with:
           context: ./
           tags: |
-            styraautomation/entitlements-samples:${{ github.ref_name }}
-            styraautomation/entitlements-samples:latest
+            styra/entitlements-samples:${{ github.ref_name }}
+            styra/entitlements-samples:latest
           builder: ${{ steps.buildx.outputs.name }}
           platforms: linux/amd64,linux/arm64
           push: true

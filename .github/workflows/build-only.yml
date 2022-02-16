@@ -24,7 +24,7 @@ jobs:
         with:
           context: ./
           tags: |
-            styraautomation/entitlements-samples:${{ github.ref_name }}
+            styra/entitlements-samples:${{ github.ref_name }}
           builder: ${{ steps.buildx.outputs.name }}
           push: false
 
