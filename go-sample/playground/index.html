@@ -474,23 +474,6 @@
     <p><b>TIP:</b>Because the DAS has a default-deny policy, these buttons will
     be disabled until you create a policy in your DAS that allows them.</p>
 
-    <h2>Last Bundle Update</h2>
-
-    <p>Each time the backing OPA instance receives a bundle update from DAS,
-    the timer below will update.
-
-    <div class="note">
-    <p><strong>Note</strong> This value may be off by up to +/-
-    30 seconds and changes only when the policy has actually changed.
-    Remember that if this timestamp doesn't change, that does not imply
-    a problem, unless someone changed the policy in DAS.</p>
-    </div>
-    </p>
-
-    <div id="bundleUpdateTimestamp">No bundle updates so far...</div>
-
-    <div id="bundleUpdateDelta"></div>
-
 
     <h2>Request Entry</h2>
     <div id="requestEntry">
@@ -516,3 +499,21 @@
     <tr><th>Subject</th><th>Action</th><th>Resource</th><th>Body</th><th>Allowed?</th><th></th><th></th></tr>
 </table>
 </div>
+
+    <h2>Last Bundle Update</h2>
+
+    <p>Each time the backing OPA instance receives a bundle update from DAS,
+    the timer below will update.
+
+    <div class="note">
+    <p><strong>Note</strong> This value may be off by up to +/-
+    30 seconds and changes only when the policy has actually changed.
+    Remember that if this timestamp doesn't change, that does not imply
+    a problem, unless someone changed the policy in DAS.</p>
+    </div>
+    </p>
+
+    <div id="bundleUpdateTimestamp">No bundle updates so far...</div>
+
+    <div id="bundleUpdateDelta"></div>
+
