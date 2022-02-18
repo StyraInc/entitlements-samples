@@ -93,6 +93,39 @@
         body.value = samples[sampleName].body
     }
 
+    function onWatchAllSamples() {
+
+        var watchDiv = document.getElementById("watching")
+        var watchTable = document.getElementById("watchingTable")
+
+        for (var sampleName in samples) {
+
+            const watchRow = document.createElement("tr")
+
+            const subject  = samples[sampleName]["subject"]
+            const action   = samples[sampleName]["action"]
+            const resource = samples[sampleName]["resource"]
+            const body     = samples[sampleName]["body"]
+
+            watchRow.className = "watcher"
+            watchRow.setAttribute("data-watcher", watchNum)
+            watchRow.innerHTML =  `<td class=watcher data-watcher=${watchNum} data-watcher-item=subject>${subject}</td>`
+            watchRow.innerHTML += `<td class=watcher data-watcher=${watchNum} data-watcher-item=action>${action}</td>`
+            watchRow.innerHTML += `<td class=watcher data-watcher=${watchNum} data-watcher-item=resource>${resource}</td>`
+            watchRow.innerHTML += `<td class=watcher data-watcher=${watchNum} data-watcher-item=body>${body}</td>`
+            watchRow.innerHTML += `<td class=watcher data-watcher=${watchNum} data-watcher-item=allowed>...</td>`
+            watchRow.innerHTML += `<td class=watcher data-watcher=${watchNum}><button class=remove_button type="button" onclick="deleteWatcher(${watchNum})">remove</button></td>`
+            watchRow.innerHTML += `<td class=watcher data-watcher=${watchNum}><button class=copy_button type="button" onclick="copyWatcher(${watchNum})">copy</button></td>`
+
+            watchTable.appendChild(watchRow)
+
+            watchNum += 1
+        }
+
+        // Force a new set of decisions
+        lastBundleCount = -1
+    }
+
 
     function getDecision(subject, action, resource, body, callback, user) {
         // Runs the callback with arguments (code, data, user) once the request
@@ -489,6 +522,7 @@
         <button type="button" onclick="onSubmit()">Submit</button>
         <button type="button" onclick="onClear()">Clear Form</button>
         <button type="button" onclick="onWatch()">Watch</button>
+        <button type="button" onclick="onWatchAllSamples()">Watch All Samples</button>
     </div>
 
 <div id="results"></div>
