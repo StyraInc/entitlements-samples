@@ -123,15 +123,27 @@ func response(input *FormInput) (interface{}, bool, error) {
 		}{"OPA is not configured, all operations are allowed."}, true, nil
 	}
 
-	// TODO: what to do with Body?
+	inputMap := map[string]interface{}{}
+
+	if input.Resource != nil {
+		inputMap["resource"] = *input.Resource
+	}
+
+	if input.Subject != nil {
+		inputMap["subject"] = *input.Subject
+	}
+
+	if input.Action != nil {
+		inputMap["action"] = *input.Action
+	}
+
+	if input.Body != nil {
+		inputMap["body"] = *input.Body
+	}
 
 	decOpts := sdk.DecisionOptions{
-		Path: rulePath,
-		Input: map[string]interface{}{
-			"resource": input.Resource,
-			"subject":  input.Subject,
-			"action":   input.Action,
-		},
+		Path:  rulePath,
+		Input: inputMap,
 	}
 
 	result, err := opa.Decision(opaContext, decOpts)

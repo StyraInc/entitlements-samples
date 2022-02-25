@@ -26,10 +26,10 @@ import (
 var indexHTMLFile string
 
 type FormInput struct {
-	Subject  string
-	Action   string
-	Resource string
-	Body     string
+	Subject  *string
+	Action   *string
+	Resource *string
+	Body     *string
 }
 
 func jsonError(w http.ResponseWriter, message string, code int) {
