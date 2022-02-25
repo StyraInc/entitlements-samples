@@ -135,14 +135,14 @@
         var xhr = new XMLHttpRequest()
         xhr.open("POST", "/submit")
         xhr.setRequestHeader("Content-Type", "application/json")
-        xhr.send(`
-{
-   "subject": "${subject}",
-   "action": "${action}",
-   "resource": "${resource}",
-   "body": "${body}"
-}
-`)
+
+        obj = {}
+        if (subject  != null) {obj["subject"]  = subject}
+        if (action   != null) {obj["action"]   = action}
+        if (resource != null) {obj["resource"] = resource}
+        if (body     != null) {obj["body"]     = body}
+
+        xhr.send(JSON.stringify(obj))
 
         // This nested function stuff is needed because other wise the
         // user-provided data dosen't make it to the inside of the
@@ -203,6 +203,11 @@
         var action = document.getElementById("actionInput").value
         var resource = document.getElementById("resourceInput").value
         var body = document.getElementById("bodyInput").value
+
+        if (subject  == "") {subject  = null}
+        if (action   == "") {action   = null}
+        if (resource == "") {resource = null}
+        if (body     == "") {body     = null}
 
         getDecision(subject, action, resource, body, function(code, data, user) {
 
