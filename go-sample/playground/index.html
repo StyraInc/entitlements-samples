@@ -2,52 +2,6 @@
 <!-- Use of this source code is governed by an Apache2 -->
 <!-- license that can be found in the LICENSE file. -->
 
-<style>
-.allowed {
-    background-color: green;
-}
-.denied {
-    background-color: red;
-}
-.timedelta_short {
-    background-color: green;
-}
-.timedelta_medium {
-    background-color: orange;
-}
-.timedelta_long {
-    background-color: red;
-}
-
-.body_wrapper {
-  max-width: 800px;
-  margin: 30px auto;
-  padding: 10px;
-}
-
-.popup_modal {
-  position: fixed;
-  max-height: 80vh;
-  box-sizing: border-box;
-  padding: 30px;
-  display: block;
-  background: white;
-  border: 1px solid black;
-  margin: auto;
-  max-width: 600px;
-  left: 0;
-  right: 0;
-}
-
-.popup_modal .close_button::after {
-  content: '×';
-  position: absolute;
-  top: 0;
-  right: 0;
-  padding: 10px 20px;
-  cursor: pointer;
-}
-</style>
 
 <script>
     var watchNum = 0
@@ -93,20 +47,6 @@
                 "body": ""
         }
     }
-
-    // We want to delay this until after the browser has had time to read
-    // the HTML of the document, since we need to know where the div is.
-    setTimeout(() => {
-        const sampleButtonsDiv = document.getElementById("sampleButtons")
-        for (const sampleName in samples) {
-                const sampleButton = document.createElement("button")
-                sampleButton.type = "button"
-                sampleButton.setAttribute("onClick", `populateSample("${sampleName}")`)
-                sampleButton.innerHTML = sampleName
-                sampleButtonsDiv.appendChild(sampleButton)
-                sampleButton.className = "sample_button"
-        }
-    }, 500)
 
     function populateSample(sampleName) {
         // Replaces the values in the form with the data for the given samples.
@@ -518,32 +458,118 @@
     }
 
     function toggleModal(id) {
+        var backdrop = document.getElementById('popup_modal_background')
+
+        if (!id) {
+            backdrop.style.display = 'none'
+            const modals = document.getElementsByClassName('popup_modal')
+            for (var i = 0; i < modals.length; i++) {
+              modals[i].style.display = 'none'
+            }
+            return
+        }
+
         var modalDiv = document.getElementById(id)
-        modalDiv.style.display = (modalDiv.style.display === 'none' ? 'block' : 'none')
+        const displayStyle = (modalDiv.style.display === 'none' ? 'block' : 'none')
+        modalDiv.style.display = displayStyle
+        backdrop.style.display = displayStyle
+
     }
 
-    watchUpdater()
+    window.onload = () => {
+      console.log('onLoad')
+      watchUpdater()
 
-    // Go ahead and update the button state after the page first loads.
-    setTimeout(() => {
-        onBundleChange()
-    }, 500);
+      const sampleButtonsDiv = document.getElementById("sampleButtons")
+      for (const sampleName in samples) {
+              const sampleButton = document.createElement("button")
+              sampleButton.type = "button"
+              sampleButton.setAttribute("onClick", `populateSample("${sampleName}")`)
+              sampleButton.innerHTML = sampleName
+              sampleButtonsDiv.appendChild(sampleButton)
+              sampleButton.className = "sample_button"
+      }
 
-    // Wait a bit before showing the 'seconds ago', to give us time to
-    // actually get the last bundle update time.
-    setTimeout(() => {
-        timeUpdater()
-    }, 2000);
-
-    setTimeout(() => {
-        onWatchAllSamples()
-    }, 500);
+      onBundleChange()
+      onWatchAllSamples()
+      timeUpdater()
+      toggleModal('introduction_modal')
+    }
 </script>
 
+<style>
+  .allowed {
+      background-color: green;
+  }
+  .denied {
+      background-color: red;
+  }
+  .timedelta_short {
+      background-color: green;
+  }
+  .timedelta_medium {
+      background-color: orange;
+  }
+  .timedelta_long {
+      background-color: red;
+  }
+
+  .body_wrapper {
+    max-width: 800px;
+    margin: 30px auto;
+    padding: 10px;
+  }
+
+  .popup_modal {
+    position: fixed;
+    max-height: 80vh;
+    box-sizing: border-box;
+    padding: 30px;
+    display: block;
+    background: white;
+    border: 1px solid black;
+    margin: auto;
+    max-width: 600px;
+    left: 0;
+    right: 0;
+    z-index: 1;
+  }
+
+  .popup_modal .close_button::after {
+    content: '×';
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  table {
+    width: 100%;
+  }
+
+  #popup_modal_background {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: gray;
+    opacity: 0.3;
+    z-index: 0;
+  }
+</style>
+
 <div class="body_wrapper">
+  <div id="popup_modal_background" style="display: none;" onClick="event.stopPropagation(); toggleModal()"></div>
   <h1>Entitlements Playground</h1>
 
-    <div class="popup_modal" id="introduction_modal" style="display: block;">
+    <div class="popup_modal" id="introduction_modal" style="display: none;" onClick="event.stopPropagation()">
       <div class="close_button" onClick="toggleModal('introduction_modal')"></div>
       <h2>Instructions</h2>
 
@@ -575,7 +601,7 @@
       be disabled until you create a policy in your DAS that allows them.</p>
     </div>
 
-    <div class="popup_modal" id="add_request_modal" style="display: none;">
+    <div class="popup_modal" id="add_request_modal" style="display: none;" onClick="event.stopPropagation()">
       <div class="close_button" onClick="toggleModal('add_request_modal')"></div>
       <h2>Request Entry</h2>
 
@@ -600,8 +626,9 @@
     <div id="results"></div>
 
     <div id="watching">
-      <h1>Watching</h1>
-      <button onClick="toggleModal('add_request_modal')">+ request</button>
+      <h2>
+        Watching <button onClick="toggleModal('add_request_modal')">+ request</button>
+      </h2>
       <table id="watchingTable">
           <tr><th>Subject</th><th>Action</th><th>Resource</th><th>Body</th><th>Allowed?</th><th></th><th></th></tr>
       </table>
@@ -623,6 +650,4 @@
     <div id="bundleUpdateTimestamp">No bundle updates so far...</div>
 
     <div id="bundleUpdateDelta"></div>
-
 </div>
-
