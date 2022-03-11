@@ -548,6 +548,10 @@
     color: #ffffff;
   }
 
+  label[for] {
+    cursor: pointer;
+  }
+
   input:not([type='checkbox']) {
     -webkit-appearance: none;
     -moz-appearance: none;
@@ -714,29 +718,28 @@
 
     <div class="popup_modal" id="add_request_modal" style="display: none;" onClick="event.stopPropagation()">
       <div class="close_button" onClick="toggleModal('add_request_modal')"></div>
-      <h2>Request Entry</h2>
+      <h2>Edit Watcher</h2>
 
       <div id="requestEntry">
         <div id="sampleButtons"></div><br/>
-          <label>Subject</label><br />
-          <input width=500 id="subjectInput" type="text" name="subject"><br />
-          <label>Action</label><br />
-          <input width=500 id="actionInput" type="text" name="action"><br />
-          <label>Resource</label><br />
-          <input width=500 id="resourceInput" type="text" name="resource"><br />
-          <label>Body</label><br />
-          <input width=500 id="bodyInput" type="text" name="body"><br /><br />
-          <div class="flex_wrapper">
-            <div>
-              <button class="primary" type="button" onclick="onPreview()">Preview</button>
-              <button type="button" onclick="onClear()">Clear Form</button>
-            </div>
-            <button class="primary" type="button" onclick="onWatch()">Create Watcher</button>
+        <label>Subject</label><br />
+        <input width=500 id="subjectInput" type="text" name="subject"><br />
+        <label>Action</label><br />
+        <input width=500 id="actionInput" type="text" name="action"><br />
+        <label>Resource</label><br />
+        <input width=500 id="resourceInput" type="text" name="resource"><br />
+        <label>Body</label><br />
+        <input width=500 id="bodyInput" type="text" name="body"><br /><br />
+        <div class="flex_wrapper">
+          <div>
+            <button class="primary" type="button" onclick="onPreview()">Preview</button>
+            <button type="button" onclick="onClear()">Clear Form</button>
           </div>
+          <button class="primary" type="button" onclick="onWatch()">Create Watcher</button>
+        </div>
+        <div id="results"></div>
       </div>
     </div>
-
-    <div id="results"></div>
 
     <div id="watching">
       <h2 class="flex_wrapper">
