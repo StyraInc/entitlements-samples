@@ -580,6 +580,8 @@
 
   .watcher p {
     padding: 5px;
+    text-transform: uppercase;
+    font-weight: 600;
   }
 
   .allowed {
@@ -743,7 +745,7 @@
 
     <div id="watching">
       <h2 class="flex_wrapper">
-        Watch List <button onClick="toggleModal('add_request_modal')">New Watcher</button>
+        Watch List <button class="primary" onClick="toggleModal('add_request_modal')">New Watcher</button>
       </h2>
       <input type="checkbox" id="allow_das_control" onclick="onBundleChange()">
       <label for="allow_das_control">Allow DAS policy to control buttons.</label><br/><br/><br/>
