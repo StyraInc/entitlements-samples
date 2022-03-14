@@ -2,27 +2,11 @@
 <!-- Use of this source code is governed by an Apache2 -->
 <!-- license that can be found in the LICENSE file. -->
 
-<style>
-.allowed {
-    background-color: green;
-}
-.denied {
-    background-color: red;
-}
-.timedelta_short {
-    background-color: green;
-}
-.timedelta_medium {
-    background-color: orange;
-}
-.timedelta_long {
-    background-color: red;
-}
-</style>
 
 <script>
     var watchNum = 0
     var lastBundleCount = -1
+    var refreshedTimestamp = null
     const watcherIntervalMs = 500
     const timedelta_medium = 60*2
     const timedelta_long = 60*5
@@ -64,20 +48,6 @@
                 "body": ""
         }
     }
-
-    // We want to delay this until after the browser has had time to read
-    // the HTML of the document, since we need to know where the div is.
-    setTimeout(() => {
-        const sampleButtonsDiv = document.getElementById("sampleButtons")
-        for (const sampleName in samples) {
-                const sampleButton = document.createElement("button")
-                sampleButton.type = "button"
-                sampleButton.setAttribute("onClick", `populateSample("${sampleName}")`)
-                sampleButton.innerHTML = sampleName
-                sampleButtonsDiv.appendChild(sampleButton)
-                sampleButton.className = "sample_button"
-        }
-    }, 500)
 
     function populateSample(sampleName) {
         // Replaces the values in the form with the data for the given samples.
@@ -198,7 +168,7 @@
         }
     }
 
-    function onSubmit() {
+    function onPreview() {
         var subject = document.getElementById("subjectInput").value
         var action = document.getElementById("actionInput").value
         var resource = document.getElementById("resourceInput").value
@@ -304,6 +274,7 @@
 
         // Force a new set of decisions
         lastBundleCount = -1
+        toggleModal()
     }
 
     function deleteWatcher(num) {
@@ -321,6 +292,8 @@
         document.getElementById("actionInput").value = action
         document.getElementById("resourceInput").value = resource
         document.getElementById("bodyInput").value = body
+
+        toggleModal('add_request_modal')
     }
 
     function getWatchedAttribute(num, attr) {
@@ -454,11 +427,9 @@
             }
         }
 
-        // update the bundle timestamp
+        // update the bundle timestamp // TODO
         bundle_timestamp(function(ts) {
-            var timestampDiv = document.getElementById("bundleUpdateTimestamp")
-            d = new Date(ts)
-            timestampDiv.innerHTML = String(d)
+          refreshedTimestamp = new Date(ts)
         })
     }
 
@@ -466,16 +437,14 @@
         // Schedule ourselves to re-run first, in case there is an exception.
         setTimeout(() => {
             timeUpdater()
-        }, 1000);
+        }, 200);
 
-        var timestampDiv = document.getElementById("bundleUpdateTimestamp")
         var deltaDiv = document.getElementById("bundleUpdateDelta")
         // Until the first time we get a bundle timestamp, this will
         // throw an exception. That's OK though, since we already
         // scheduled ourself to run again later.
-        bundleTime = new Date(timestampDiv.innerHTML)
-        var delta = Math.round(((new Date()) - bundleTime) / 1000)
-        deltaDiv.innerHTML = `${delta} seconds ago`
+        var delta = Math.round(((new Date()) - refreshedTimestamp) / 1000)
+        deltaDiv.innerHTML = `Last updated: ${delta} seconds ago`
 
         // Update the CSS class of our div to color code based on how long it's
         // been since we got a bundle update.
@@ -488,97 +457,304 @@
         }
     }
 
-    watchUpdater()
+    function toggleModal(id) {
+      var backdrop = document.getElementById('popup_modal_background')
 
-    // Go ahead and update the button state after the page first loads.
-    setTimeout(() => {
-        onBundleChange()
-    }, 500);
+      if (!id) {
+          backdrop.style.display = 'none'
+          const modals = document.getElementsByClassName('popup_modal')
+          for (var i = 0; i < modals.length; i++) {
+            modals[i].style.display = 'none'
+          }
+          onClear()
+          return
+      }
 
-    // Wait a bit before showing the 'seconds ago', to give us time to
-    // actually get the last bundle update time.
-    setTimeout(() => {
-        timeUpdater()
-    }, 2000);
+      var modalDiv = document.getElementById(id)
+      const displayStyle = (modalDiv.style.display === 'none' ? 'block' : 'none')
+      modalDiv.style.display = displayStyle
+      backdrop.style.display = displayStyle
 
-    setTimeout(() => {
-        onWatchAllSamples()
-    }, 500);
+      if (displayStyle === 'none') {
+        onClear()
+      }
+    }
+
+    window.onload = () => {
+      watchUpdater()
+
+      const sampleButtonsDiv = document.getElementById("sampleButtons")
+      for (const sampleName in samples) {
+        const sampleButton = document.createElement("button")
+        sampleButton.type = "button"
+        sampleButton.setAttribute("onClick", `populateSample("${sampleName}")`)
+        sampleButton.innerHTML = sampleName
+        sampleButtonsDiv.appendChild(sampleButton)
+        sampleButton.className = "sample_button"
+      }
+
+      onBundleChange()
+      onWatchAllSamples()
+      timeUpdater()
+      toggleModal('introduction_modal')
+    }
 </script>
 
-<h1>Entitlements Playground</h1>
+<style>
+  :root {
+    --primary-color: #137cbd;
+    --success-color: #0f9960;
+    --warning-color: #d9822b;
+    --danger-color: #db3737;
+    --gray-color: #99a6b138;
+    --text-color: #182026;
+  }
 
-    <h2>Instructions</h2>
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    color: var(--text-color);
+  }
 
-    <p>Welcome to the Entitlements Playground! This tool allows you to
-    experiment with different requests using the Entitlements object model.
-    Start filling the form fields below and then click the <b>Submit</b> button
-    to work on the object model. Try using the row of sample buttons above the
-    form to pre-populate the fields with some example values.</p>
+  button {
+    background-color: var(--gray-color);
+    -webkit-box-shadow: inset 0 0 0 1px rgb(16 22 26 / 40%), inset 0 -1px 0 rgb(16 22 26 / 20%);
+    box-shadow: inset 0 0 0 1px rgb(16 22 26 / 40%), inset 0 -1px 0 rgb(16 22 26 / 20%);
+    display: -webkit-inline-box;
+    display: -ms-inline-flexbox;
+    display: inline-flex;
+    -webkit-box-orient: horizontal;
+    -webkit-box-direction: normal;
+    -ms-flex-direction: row;
+    flex-direction: row;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 14px;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    padding: 5px 10px;
+    text-align: left;
+    vertical-align: middle;
+    min-height: 30px;
+    min-width: 30px;
+  }
 
-    <p>You can also watch a request. When you click the <b>Watch</b> button
-    below, the request data will be stored in the <b>Watching</b> table below.
-    The <b>Allowed?</b> column will update in real-time according to policy
-    changes made in the DAS to show whether that request would be allowed or
-    denied. You can use the <b>Copy</b> button to copy a row back into the form
-    fields, allowing you to <b>Submit</b> it again and see the full response
-    from the DAS. The <b>Remove</b> button will delete the row from the
-    table.</p>
+  button.primary {
+    background-color: var(--primary-color);
+    color: #ffffff;
+  }
 
-    <p>When "Allow DAS policy to control buttons" is checked, the sample
-    buttons above the form, and the <b>Copy</b> and <b>Remove</b> buttons for
-    each row in the <b>Watching</b> table are controlled by Entitlements
-    policies. Each group of buttons can be enabled or disabled by creating a
-    policy to allow or deny access to the
-    <code>/entz-playground/buttons/samples</code>,
-    <code>/entz-playground/buttons/copy</code>, or
-    <code>/entz-playground/buttons/remove</code> respectively. </p>
+  label[for] {
+    cursor: pointer;
+  }
 
-    <p><b>TIP:</b>Because the DAS has a default-deny policy, these buttons will
-    be disabled until you create a policy in your DAS that allows them.</p>
+  input:not([type='checkbox']) {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background: #ffffff;
+    border: none;
+    border-radius: 3px;
+    -webkit-box-shadow: 0 0 0 0 rgb(19 124 189 / 0%), 0 0 0 0 rgb(19 124 189 / 0%), inset 0 0 0 1px rgb(16 22 26 / 15%), inset 0 1px 1px rgb(16 22 26 / 20%);
+    box-shadow: 0 0 0 0 rgb(19 124 189 / 0%), 0 0 0 0 rgb(19 124 189 / 0%), inset 0 0 0 1px rgb(16 22 26 / 15%), inset 0 1px 1px rgb(16 22 26 / 20%);
+    color: var(--text-color);
+    font-size: 14px;
+    font-weight: 400;
+    height: 30px;
+    line-height: 30px;
+    outline: none;
+    padding: 0 10px;
+    -webkit-transition: -webkit-box-shadow 100ms cubic-bezier(0.4, 1, 0.75, 0.9);
+    transition: -webkit-box-shadow 100ms cubic-bezier(0.4, 1, 0.75, 0.9);
+    transition: box-shadow 100ms cubic-bezier(0.4, 1, 0.75, 0.9);
+    transition: box-shadow 100ms cubic-bezier(0.4, 1, 0.75, 0.9), -webkit-box-shadow 100ms cubic-bezier(0.4, 1, 0.75, 0.9);
+    vertical-align: middle;
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 10px;
+  }
 
-    <input type="checkbox" id="allow_das_control" onclick="onBundleChange()">Allow DAS policy to control
-    buttons.</input>
+  .watcher p {
+    padding: 5px;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
 
-    <h2>Request Entry</h2>
-    <div id="requestEntry">
-        <div id="sampleButtons"></div>
-        <label>Subject:</label><br />
+  .allowed {
+      background-color: var(--success-color);
+      color: white;
+  }
+  .denied {
+      background-color: var(--danger-color);
+      color: white;
+  }
+  .timedelta_short {
+      background-color: var(--success-color);
+      color: white;
+  }
+  .timedelta_medium {
+      background-color: var(--warning-color);
+      color: white;
+  }
+  .timedelta_long {
+      background-color: var(--danger-color);
+      color: white;
+  }
+
+  #bundleUpdateDelta {
+    padding: 10px;
+  }
+
+  .body_wrapper {
+    max-width: 800px;
+    margin: 30px auto;
+    padding: 10px;
+  }
+
+  .popup_modal {
+    position: fixed;
+    max-height: 80vh;
+    box-sizing: border-box;
+    padding: 30px;
+    display: block;
+    background: white;
+    border: 1px solid black;
+    margin: auto;
+    max-width: 600px;
+    left: 0;
+    right: 0;
+    z-index: 1;
+  }
+
+  .popup_modal .close_button::after {
+    content: '×';
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  table {
+    width: 100%;
+  }
+
+  #popup_modal_background {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--gray-color);
+    z-index: 0;
+  }
+
+  .footer {
+    position: fixed;
+    background: var(--gray-color);
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 10px;
+  }
+
+  .flex_wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .info_icon {
+    font-size: 22px;
+    vertical-align: top;
+    color: var(--primary-color);
+    text-decoration: none;
+    cursor: pointer;
+  }
+</style>
+
+<div class="body_wrapper">
+  <div id="popup_modal_background" style="display: none;" onClick="event.stopPropagation(); toggleModal()"></div>
+  <h1>Entitlements Playground <a class="info_icon" onClick="event.preventDefault(); toggleModal('introduction_modal')">ⓘ</a></h1>
+
+    <div class="popup_modal" id="introduction_modal" style="display: none;" onClick="event.stopPropagation()">
+      <div class="close_button" onClick="toggleModal('introduction_modal')"></div>
+      <h2>Instructions</h2>
+
+      <p>Welcome to the Entitlements Playground! This tool allows you to
+      experiment with different requests using the Entitlements object model.
+      Start filling the form fields below and then click the <b>Preview</b> button
+      to work on the object model. Try using the row of sample buttons above the
+      form to pre-populate the fields with some example values.</p>
+
+      <p>You can also watch a request. When you click the <b>Watch</b> button
+      below, the request data will be stored in the <b>Watch List</b> table below.
+      The <b>Allowed?</b> column will update in real-time according to policy
+      changes made in the DAS to show whether that request would be allowed or
+      denied. You can use the <b>Copy</b> button to copy a row back into the form
+      fields, allowing you to <b>Preview</b> it again and see the full response
+      from the DAS. The <b>Remove</b> button will delete the row from the
+      table.</p>
+
+      <p>When "Allow DAS policy to control buttons" is checked, the sample
+      buttons above the form, and the <b>Copy</b> and <b>Remove</b> buttons for
+      each row in the <b>Watch List</b> table are controlled by Entitlements
+      policies. Each group of buttons can be enabled or disabled by creating a
+      policy to allow or deny access to the
+      <code>/entz-playground/buttons/samples</code>,
+      <code>/entz-playground/buttons/copy</code>, or
+      <code>/entz-playground/buttons/remove</code> respectively. </p>
+
+      <p><b>TIP:</b>Because the DAS has a default-deny policy, these buttons will
+      be disabled until you create a policy in your DAS that allows them.</p>
+    </div>
+
+    <div class="popup_modal" id="add_request_modal" style="display: none;" onClick="event.stopPropagation()">
+      <div class="close_button" onClick="toggleModal('add_request_modal')"></div>
+      <h2>Edit Watcher</h2>
+
+      <div id="requestEntry">
+        <div id="sampleButtons"></div><br/>
+        <label>Subject</label><br />
         <input width=500 id="subjectInput" type="text" name="subject"><br />
-        <label>Action:</label><br />
+        <label>Action</label><br />
         <input width=500 id="actionInput" type="text" name="action"><br />
-        <label>Resource:</label><br />
+        <label>Resource</label><br />
         <input width=500 id="resourceInput" type="text" name="resource"><br />
-        <label>Body:</label><br />
-        <input width=500 id="bodyInput" type="text" name="body"><br />
-        <button type="button" onclick="onSubmit()">Submit</button>
-        <button type="button" onclick="onClear()">Clear Form</button>
-        <button type="button" onclick="onWatch()">Watch</button>
+        <label>Body</label><br />
+        <input width=500 id="bodyInput" type="text" name="body"><br /><br />
+        <div class="flex_wrapper">
+          <div>
+            <button class="primary" type="button" onclick="onPreview()">Preview</button>
+            <button type="button" onclick="onClear()">Clear Form</button>
+          </div>
+          <button class="primary" type="button" onclick="onWatch()">Create Watcher</button>
+        </div>
+        <div id="results"></div>
+      </div>
     </div>
 
-<div id="results"></div>
+    <div id="watching">
+      <h2 class="flex_wrapper">
+        Watch List <button class="primary" onClick="toggleModal('add_request_modal')">New Watcher</button>
+      </h2>
+      <input type="checkbox" id="allow_das_control" onclick="onBundleChange()">
+      <label for="allow_das_control">Allow DAS policy to control buttons.</label><br/><br/><br/>
+      <table id="watchingTable">
+        <tr><th>Subject</th><th>Action</th><th>Resource</th><th>Body</th><th>Allowed?</th><th></th><th></th></tr>
+      </table>
+    </div>
 
-<div id="watching">
-<h1>Watching</h1>
-<table id="watchingTable">
-    <tr><th>Subject</th><th>Action</th><th>Resource</th><th>Body</th><th>Allowed?</th><th></th><th></th></tr>
-</table>
+    <div class="footer">
+      <div id="bundleUpdateDelta" class="body_wrapper"></div>
+    </div>
 </div>
-
-    <h2>Last Bundle Update</h2>
-
-    <p>Each time the backing OPA instance receives a bundle update from DAS,
-    the timer below will update.
-
-    <div class="note">
-    <p><strong>Note</strong> This value may be off by up to +/-
-    30 seconds and changes only when the policy has actually changed.
-    Remember that if this timestamp doesn't change, that does not imply
-    a problem, unless someone changed the policy in DAS.</p>
-    </div>
-    </p>
-
-    <div id="bundleUpdateTimestamp">No bundle updates so far...</div>
-
-    <div id="bundleUpdateDelta"></div>
-
