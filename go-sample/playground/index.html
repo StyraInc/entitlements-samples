@@ -2,98 +2,75 @@
 <!-- Use of this source code is governed by an Apache2 -->
 <!-- license that can be found in the LICENSE file. -->
 
-
+<script src="https://kit.fontawesome.com/444f16dd67.js" crossorigin="anonymous"></script>
 <script>
-    var watchNum = 0
+    const WATCHER_INTERVAL_MS = 500
+    const TIMEDELTA_MEDIUM = 60*2
+    const TIMEDELTA_LONG = 60*5
+
     var lastBundleCount = -1
     var refreshedTimestamp = null
-    const watcherIntervalMs = 500
-    const timedelta_medium = 60*2
-    const timedelta_long = 60*5
-    const samples = {
-        "sample 1": {
-                "subject": "alice",
-                "action": "GET",
-                "resource": "/cars",
-                "body": ""
-        },
-        "sample 2": {
-                "subject": "bob",
-                "action": "GET",
-                "resource": "/cars/car0",
-                "body": ""
-        },
-        "sample 3": {
-                "subject": "bob",
-                "action": "POST",
-                "resource": "/cars",
-                "body": ""
-        },
-        "playground sample buttons": {
-                "subject": "",
-                "action": "",
-                "resource": "/entz-playground/buttons/samples",
-                "body": ""
-        },
-        "playground copy buttons": {
-                "subject": "",
-                "action": "",
-                "resource": "/entz-playground/buttons/copy",
-                "body": ""
-        },
-        "playground remove buttons": {
-                "subject": "",
-                "action": "",
-                "resource": "/entz-playground/buttons/remove",
-                "body": ""
-        }
-    }
+    var editWatcherIndex = null
+    var watcherList = [
+      {
+        "subject": "alice",
+        "action": "GET",
+        "resource": "/cars",
+        "body": ""
+      }, {
+        "subject": "bob",
+        "action": "GET",
+        "resource": "/cars/car0",
+        "body": ""
+      }, {
+        "subject": "bob",
+        "action": "POST",
+        "resource": "/cars",
+        "body": ""
+      }, {
+        "subject": "",
+        "action": "",
+        "resource": "/entz-playground/buttons/samples",
+        "body": ""
+      }, {
+        "subject": "",
+        "action": "",
+        "resource": "/entz-playground/buttons/copy",
+        "body": ""
+      }, {
+        "subject": "",
+        "action": "",
+        "resource": "/entz-playground/buttons/remove",
+        "body": ""
+      }
+    ]
 
-    function populateSample(sampleName) {
-        // Replaces the values in the form with the data for the given samples.
+    function renderAllWatchers() {
+      var watchTable = document.getElementById("watchingTable")
+      watchTable.innerHTML = ''
 
-        var subject = document.getElementById("subjectInput")
-        var action = document.getElementById("actionInput")
-        var resource = document.getElementById("resourceInput")
-        var body = document.getElementById("bodyInput")
+      watcherList.forEach((singleWatcher, index) => {
+        const watchRow = document.createElement("tr")
 
-        subject.value = samples[sampleName].subject
-        action.value = samples[sampleName].action
-        resource.value = samples[sampleName].resource
-        body.value = samples[sampleName].body
-    }
+        const subject  = singleWatcher["subject"]
+        const action   = singleWatcher["action"]
+        const resource = singleWatcher["resource"]
+        const body     = singleWatcher["body"]
 
-    function onWatchAllSamples() {
+        watchRow.className = "watcher"
+        watchRow.setAttribute("data-watcher", index)
+        watchRow.innerHTML =  `<td class=watcher data-watcher=${index} data-watcher-item=subject>${subject}</td>`
+        watchRow.innerHTML += `<td class=watcher data-watcher=${index} data-watcher-item=action>${action}</td>`
+        watchRow.innerHTML += `<td class=watcher data-watcher=${index} data-watcher-item=resource>${resource}</td>`
+        watchRow.innerHTML += `<td class=watcher data-watcher=${index} data-watcher-item=body>${body}</td>`
+        watchRow.innerHTML += `<td class=watcher data-watcher=${index} data-watcher-item=allowed>...</td>`
+        watchRow.innerHTML += `<td class="watcher control_buttons" data-watcher=${index}><button class=copy_button type="button" onclick="editWatcher(${index})">Edit</button> <button class=remove_button type="button" onclick="deleteWatcher(${index})"><i class="fa-solid fa-trash-can"></i></button></td>`
 
-        var watchDiv = document.getElementById("watching")
-        var watchTable = document.getElementById("watchingTable")
+        watchTable.appendChild(watchRow)
+      })
 
-        for (var sampleName in samples) {
-
-            const watchRow = document.createElement("tr")
-
-            const subject  = samples[sampleName]["subject"]
-            const action   = samples[sampleName]["action"]
-            const resource = samples[sampleName]["resource"]
-            const body     = samples[sampleName]["body"]
-
-            watchRow.className = "watcher"
-            watchRow.setAttribute("data-watcher", watchNum)
-            watchRow.innerHTML =  `<td class=watcher data-watcher=${watchNum} data-watcher-item=subject>${subject}</td>`
-            watchRow.innerHTML += `<td class=watcher data-watcher=${watchNum} data-watcher-item=action>${action}</td>`
-            watchRow.innerHTML += `<td class=watcher data-watcher=${watchNum} data-watcher-item=resource>${resource}</td>`
-            watchRow.innerHTML += `<td class=watcher data-watcher=${watchNum} data-watcher-item=body>${body}</td>`
-            watchRow.innerHTML += `<td class=watcher data-watcher=${watchNum} data-watcher-item=allowed>...</td>`
-            watchRow.innerHTML += `<td class=watcher data-watcher=${watchNum}><button class=remove_button type="button" onclick="deleteWatcher(${watchNum})">remove</button></td>`
-            watchRow.innerHTML += `<td class=watcher data-watcher=${watchNum}><button class=copy_button type="button" onclick="copyWatcher(${watchNum})">copy</button></td>`
-
-            watchTable.appendChild(watchRow)
-
-            watchNum += 1
-        }
-
-        // Force a new set of decisions
-        lastBundleCount = -1
+      // Force a new set of decisions
+      lastBundleCount = -1
     }
 
 
@@ -235,54 +212,46 @@
         action.value = ""
         resource.value = ""
         body.value = ""
+        editWatcherIndex = null
 
         const resultsDiv = document.getElementById("results")
         resultsDiv.innerHTML = ''
     }
 
     function onWatch() {
-        // The way this works is we create a row in the "watch table", using
-        // data- attributes to embed information about what we are supposed to
-        // watch. An asynchronous function loops over all of them at regular
-        // intervals and re-requests decisions from the back-end.
-        //
-        // The data-watcher attribute is the unique watcher number, and the
-        // data-watcher-item distinguishes td elements of the same watcher,
-        // being subject, action, resource, body, and allowed respectively.
+      var watchDiv = document.getElementById("watching")
+      var subject = document.getElementById("subjectInput").value
+      var action = document.getElementById("actionInput").value
+      var resource = document.getElementById("resourceInput").value
+      var body = document.getElementById("bodyInput").value
+      var newWatcher = {subject, action, resource, body}
 
-        var watchDiv = document.getElementById("watching")
-        var watchTable = document.getElementById("watchingTable")
-        var subject = document.getElementById("subjectInput").value
-        var action = document.getElementById("actionInput").value
-        var resource = document.getElementById("resourceInput").value
-        var body = document.getElementById("bodyInput").value
+      if (Number.isInteger(editWatcherIndex)) {
+        watcherList[editWatcherIndex] = newWatcher
+      } else {
+        watcherList.push(newWatcher)
+      }
 
-        const watchRow = document.createElement("tr")
-        watchRow.className = "watcher"
-        watchRow.setAttribute("data-watcher", watchNum)
-        watchRow.innerHTML =  `<td class=watcher data-watcher=${watchNum} data-watcher-item=subject>${subject}</td>`
-        watchRow.innerHTML += `<td class=watcher data-watcher=${watchNum} data-watcher-item=action>${action}</td>`
-        watchRow.innerHTML += `<td class=watcher data-watcher=${watchNum} data-watcher-item=resource>${resource}</td>`
-        watchRow.innerHTML += `<td class=watcher data-watcher=${watchNum} data-watcher-item=body>${body}</td>`
-        watchRow.innerHTML += `<td class=watcher data-watcher=${watchNum} data-watcher-item=allowed>...</td>`
-        watchRow.innerHTML += `<td class=watcher data-watcher=${watchNum}><button class=remove_button type="button" onclick="deleteWatcher(${watchNum})">remove</button></td>`
-        watchRow.innerHTML += `<td class=watcher data-watcher=${watchNum}><button class=copy_button type="button" onclick="copyWatcher(${watchNum})">copy</button></td>`
+      editWatcherIndex = null
 
-        watchTable.appendChild(watchRow)
+      renderAllWatchers()
 
-        watchNum += 1
-
-        // Force a new set of decisions
-        lastBundleCount = -1
-        toggleModal()
+      // Force a new set of decisions
+      lastBundleCount = -1
+      toggleModal()
     }
 
-    function deleteWatcher(num) {
-        const node = document.evaluate(`//tr[@data-watcher='${num}']`, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue
-        node.remove()
+    function deleteWatcher(index) {
+      if (Number.isInteger(index)) {
+        watcherList.splice(index, 1)
+      }
+
+      renderAllWatchers()
     }
 
-    function copyWatcher(num) {
+    function editWatcher(num) {
+        editWatcherIndex = num
+
         var subject = getWatchedAttribute(num, "subject")
         var action = getWatchedAttribute(num, "action")
         var resource = getWatchedAttribute(num, "resource")
@@ -308,7 +277,7 @@
         // Schedule ourselves to re-run first, in case there is an exception.
         setTimeout(() => {
             watchUpdater()
-        }, watcherIntervalMs);
+        }, WATCHER_INTERVAL_MS);
 
         bundle_count(function(count) {
             // Nothing has changed, so we don't need to update anything.
@@ -449,10 +418,10 @@
         // Update the CSS class of our div to color code based on how long it's
         // been since we got a bundle update.
         deltaDiv.className = "timedelta_short"
-        if (delta > timedelta_medium) {
+        if (delta > TIMEDELTA_MEDIUM) {
             deltaDiv.className = "timedelta_medium"
         }
-        if (delta > timedelta_long) {
+        if (delta > TIMEDELTA_LONG) {
             deltaDiv.className = "timedelta_long"
         }
     }
@@ -482,19 +451,8 @@
 
     window.onload = () => {
       watchUpdater()
-
-      const sampleButtonsDiv = document.getElementById("sampleButtons")
-      for (const sampleName in samples) {
-        const sampleButton = document.createElement("button")
-        sampleButton.type = "button"
-        sampleButton.setAttribute("onClick", `populateSample("${sampleName}")`)
-        sampleButton.innerHTML = sampleName
-        sampleButtonsDiv.appendChild(sampleButton)
-        sampleButton.className = "sample_button"
-      }
-
       onBundleChange()
-      onWatchAllSamples()
+      renderAllWatchers()
       timeUpdater()
       toggleModal('introduction_modal')
     }
@@ -508,11 +466,13 @@
     --danger-color: #db3737;
     --gray-color: #99a6b138;
     --text-color: #182026;
+    --background-color: #E2E8EC;
   }
 
   body {
     font-family: Arial, Helvetica, sans-serif;
     color: var(--text-color);
+    background-color: var(--background-color);
   }
 
   button {
@@ -578,6 +538,10 @@
     margin-bottom: 10px;
   }
 
+  .watcher.control_buttons {
+    text-align: right;
+  }
+
   .watcher p {
     padding: 5px;
     text-transform: uppercase;
@@ -607,6 +571,7 @@
 
   #bundleUpdateDelta {
     padding: 10px;
+    border-radius: 3px;
   }
 
   .body_wrapper {
@@ -723,7 +688,6 @@
       <h2>Edit Watcher</h2>
 
       <div id="requestEntry">
-        <div id="sampleButtons"></div><br/>
         <label>Subject</label><br />
         <input width=500 id="subjectInput" type="text" name="subject"><br />
         <label>Action</label><br />
