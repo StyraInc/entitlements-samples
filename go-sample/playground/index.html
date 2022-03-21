@@ -461,12 +461,14 @@
 <style>
   :root {
     --primary-color: #137cbd;
+    --secondary-color: #394B59;
     --success-color: #0f9960;
     --warning-color: #d9822b;
     --danger-color: #db3737;
     --gray-color: #99a6b138;
     --text-color: #182026;
     --background-color: #E2E8EC;
+    --white: #FFFFFF;
   }
 
   body {
@@ -505,7 +507,12 @@
 
   button.primary {
     background-color: var(--primary-color);
-    color: #ffffff;
+    color: var(--white);
+  }
+
+  button.secondary {
+    background-color: var(--secondary-color);
+    color: var(--white);
   }
 
   label[for] {
@@ -516,7 +523,7 @@
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
-    background: #ffffff;
+    background: var(--white);
     border: none;
     border-radius: 3px;
     -webkit-box-shadow: 0 0 0 0 rgb(19 124 189 / 0%), 0 0 0 0 rgb(19 124 189 / 0%), inset 0 0 0 1px rgb(16 22 26 / 15%), inset 0 1px 1px rgb(16 22 26 / 20%);
@@ -699,9 +706,9 @@
         <div class="flex_wrapper">
           <div>
             <button class="primary" type="button" onclick="onPreview()">Preview</button>
-            <button type="button" onclick="onClear()">Clear Form</button>
+            <button class="secondary" type="button" onclick="onClear()">Clear form</button>
           </div>
-          <button class="primary" type="button" onclick="onWatch()">Create Watcher</button>
+          <button class="primary" type="button" onclick="onWatch()">Create watcher</button>
         </div>
         <div id="results"></div>
       </div>
@@ -709,7 +716,7 @@
 
     <div id="watching">
       <h2 class="flex_wrapper">
-        Watch List <button class="primary" onClick="toggleModal('add_request_modal')">New Watcher</button>
+        Watch List <button class="primary" onClick="toggleModal('add_request_modal')">New watcher</button>
       </h2>
       <input type="checkbox" id="allow_das_control" onclick="onBundleChange()">
       <label for="allow_das_control">Allow DAS policy to control buttons.</label><br/><br/><br/>
