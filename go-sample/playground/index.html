@@ -49,6 +49,16 @@
       var watchTable = document.getElementById("watchingTable")
       watchTable.innerHTML = ''
 
+      // render header
+      const headerRow = document.createElement("tr")
+      headerRow.innerHTML = `<th></th>`
+      headerRow.innerHTML += `<th>Subject</th>`
+      headerRow.innerHTML += `<th>Action</th>`
+      headerRow.innerHTML += `<th>Resource</th>`
+      headerRow.innerHTML += `<th>Body</th>`
+      headerRow.innerHTML += `<th>Status</th>`
+      watchTable.appendChild(headerRow)
+
       watcherList.forEach((singleWatcher, index) => {
         const watchRow = document.createElement("tr")
 
@@ -608,6 +618,7 @@
     padding: 45px 30px 20px 20px;
     cursor: pointer;
     font-weight: 600;
+    font-size: 1.5em;
   }
 
   button {
@@ -616,6 +627,10 @@
 
   table {
     width: 100%;
+  }
+
+  th {
+    text-align: left;
   }
 
   #popup_modal_background {
