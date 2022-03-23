@@ -45,13 +45,26 @@
       }
     ]
 
+    function onToggleResult (index) {
+      const node = document.querySelectorAll(`.watcher_result[data-watcher="${index}"]`)[0]
+      const caretNode = document.querySelectorAll(`.fa-caret-down[data-watcher="${index}"]`)[0]
+      if (node.style.display === 'none') {
+        node.style.display = 'table-row'
+        caretNode.classList.add('visible');
+        return
+      }
+      node.style.display = 'none'
+      caretNode.classList.remove('visible');
+    }
+
     function renderAllWatchers() {
       var watchTable = document.getElementById("watchingTable")
       watchTable.innerHTML = ''
 
       // render header
       const headerRow = document.createElement("tr")
-      headerRow.innerHTML = `<th>Subject</th>`
+      headerRow.innerHTML =  `<th></th>`
+      headerRow.innerHTML += `<th>Subject</th>`
       headerRow.innerHTML += `<th>Action</th>`
       headerRow.innerHTML += `<th>Resource</th>`
       headerRow.innerHTML += `<th>Body</th>`
@@ -60,22 +73,29 @@
 
       watcherList.forEach((singleWatcher, index) => {
         const watchRow = document.createElement("tr")
-
-        const subject  = singleWatcher["subject"]
-        const action   = singleWatcher["action"]
-        const resource = singleWatcher["resource"]
-        const body     = singleWatcher["body"]
+        const resultRow = document.createElement("tr")
+        const {subject, action, resource, body, response, isResultVisible} = singleWatcher || {}
+        const caretClassName = isResultVisible ? "visible" : ""
 
         watchRow.className = "watcher"
         watchRow.setAttribute("data-watcher", index)
-        watchRow.innerHTML =  `<td class=watcher data-watcher=${index} data-watcher-item=subject>${subject}</td>`
+
+          const expandCollapseElement = `<i class="fa-solid fa-caret-down ${caretClassName}" onclick="onToggleResult(${index})" data-watcher=${index}></i>`
+        watchRow.innerHTML =  `<td class=watcher data-watcher=${index} data-watcher-item=caret>${expandCollapseElement}</td>`
+        watchRow.innerHTML += `<td class=watcher data-watcher=${index} data-watcher-item=subject>${subject}</td>`
         watchRow.innerHTML += `<td class=watcher data-watcher=${index} data-watcher-item=action>${action}</td>`
         watchRow.innerHTML += `<td class=watcher data-watcher=${index} data-watcher-item=resource>${resource}</td>`
         watchRow.innerHTML += `<td class=watcher data-watcher=${index} data-watcher-item=body>${body}</td>`
         watchRow.innerHTML += `<td class=watcher data-watcher=${index} data-watcher-item=allowed>...</td>`
         watchRow.innerHTML += `<td class="watcher control_buttons" data-watcher=${index}><button class=copy_button type="button" onclick="editWatcher(${index})">Edit</button> <button class=remove_button type="button" onclick="deleteWatcher(${index})"><i class="fa-solid fa-trash-can"></i></button></td>`
-
         watchTable.appendChild(watchRow)
+
+        resultRow.className = "watcher_result"
+        resultRow.setAttribute("data-watcher", index)
+        resultRow.style.display = 'none'
+        resultRow.innerHTML = `<td colspan=7 class=watcher data-watcher=${index} data-watcher-item=result>RESULT HERE</td>`
+
+        watchTable.appendChild(resultRow)
       })
 
       // Force a new set of decisions
@@ -112,6 +132,7 @@
     }
 
     function highlight(code, language, callback) {
+        debugger
         var xhr = new XMLHttpRequest()
         xhr.open("PUT", `/highlight/${language}`)
         xhr.setRequestHeader("Content-Type", "text/plain")
@@ -261,6 +282,7 @@
     function editWatcher(num) {
         editWatcherIndex = num
 
+        // TODO - why are we using `getWatchedAttribute`
         var subject = getWatchedAttribute(num, "subject")
         var action = getWatchedAttribute(num, "action")
         var resource = getWatchedAttribute(num, "resource")
@@ -303,14 +325,25 @@
         while (true) {
             var node = xpathIter.iterateNext()
             if (node == null) { break }
-            var num = Number(node.getAttribute("data-watcher"))
+            // keep as const or closure will break in getDecision
+            const index = Number(node.getAttribute("data-watcher"))
 
-            var subject = getWatchedAttribute(num, "subject")
-            var action = getWatchedAttribute(num, "action")
-            var resource = getWatchedAttribute(num, "resource")
-            var body = getWatchedAttribute(num, "body")
+            var subject = getWatchedAttribute(index, "subject")
+            var action = getWatchedAttribute(index, "action")
+            var resource = getWatchedAttribute(index, "resource")
+            var body = getWatchedAttribute(index, "body")
 
             getDecision(subject, action, resource, body, function(code, data, user) {
+                highlight(JSON.stringify(data?.response, null, 4), "json", function(resp) {
+                  const respCode = document.createElement("code")
+                  respCode.className = "watcherListResponse"
+                  respCode.innerHTML = resp
+
+                  const node = document.querySelectorAll(`.watcher[data-watcher-item=result][data-watcher="${index}"]`)[0]
+                  node.innerHTML = ''
+                  node.appendChild(respCode)
+                })
+
                 if (code >= 400) {
                     user.innerHTML = "ERROR"
                     console.log(`got error code ${code}, result was: `, data)
@@ -552,6 +585,15 @@
     margin-bottom: 10px;
   }
 
+  .fa-caret-down {
+    cursor: pointer;
+    transform: rotate(-90deg);
+    transition: transform 200ms;
+  }
+  .fa-caret-down.visible {
+    transform: rotate(0deg);
+  }
+
   .watcher.control_buttons {
     text-align: right;
   }
@@ -581,6 +623,16 @@
   .timedelta_long {
       background-color: var(--danger-color);
       color: white;
+  }
+
+  .watcherListResponse {
+    padding: 10px;
+  }
+
+  code pre {
+    max-height: 400px;
+    overflow: auto;
+    padding: 10px;
   }
 
   #bundleUpdateDelta {
