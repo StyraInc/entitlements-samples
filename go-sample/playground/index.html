@@ -2,7 +2,6 @@
 <!-- Use of this source code is governed by an Apache2 -->
 <!-- license that can be found in the LICENSE file. -->
 
-<script src="https://kit.fontawesome.com/444f16dd67.js" crossorigin="anonymous"></script>
 <script>
     const WATCHER_INTERVAL_MS = 500
     const TIMEDELTA_MEDIUM = 60*2
@@ -41,7 +40,7 @@
 
     function onToggleResult (index) {
       const node = document.querySelectorAll(`.watcher_result[data-watcher="${index}"]`)[0]
-      const caretNode = document.querySelectorAll(`.fa-caret-down[data-watcher="${index}"]`)[0]
+      const caretNode = document.querySelectorAll(`.icon-caret[data-watcher="${index}"]`)[0]
       if (node.style.display === 'none') {
         node.style.display = 'table-row'
         caretNode.classList.add('visible');
@@ -73,13 +72,13 @@
         watchRow.className = "watcher"
         watchRow.setAttribute("data-watcher", index)
 
-          const expandCollapseElement = `<i class="fa-solid fa-caret-down ${caretClassName}" onclick="onToggleResult(${index})" data-watcher=${index}></i>`
+        const expandCollapseElement = `<i class="icon icon-caret ${caretClassName}" onclick="onToggleResult(${index})" data-watcher=${index}></i>`
         watchRow.innerHTML =  `<td class=watcher data-watcher=${index} data-watcher-item=caret>${expandCollapseElement}</td>`
         watchRow.innerHTML += `<td class=watcher data-watcher=${index} data-watcher-item=subject>${subject}</td>`
         watchRow.innerHTML += `<td class=watcher data-watcher=${index} data-watcher-item=action>${action}</td>`
         watchRow.innerHTML += `<td class=watcher data-watcher=${index} data-watcher-item=resource>${resource}</td>`
         watchRow.innerHTML += `<td class=watcher data-watcher=${index} data-watcher-item=allowed>...</td>`
-        watchRow.innerHTML += `<td class="watcher control_buttons" data-watcher=${index}><button class=copy_button type="button" onclick="editWatcher(${index})">Edit</button> <button class=remove_button type="button" onclick="deleteWatcher(${index})"><i class="fa-solid fa-trash-can"></i></button></td>`
+        watchRow.innerHTML += `<td class="watcher control_buttons" data-watcher=${index}><button class=copy_button type="button" onclick="editWatcher(${index})">Edit</button> <button class=remove_button type="button" onclick="deleteWatcher(${index})"><i class="icon icon-trash"></i></button></td>`
         watchTable.appendChild(watchRow)
 
         resultRow.className = "watcher_result"
@@ -580,13 +579,46 @@
     margin-bottom: 10px;
   }
 
-  .fa-caret-down {
+  input[type=checkbox] {
+    display:none;
+  }
+  input[type=checkbox] + label {
+    background: url(/assets/checkbox_blank.svg) no-repeat;
+    padding-left: 24px;
+    background-size: 18px;
+  }
+  input[type=checkbox]:checked + label {
+    background: url(/assets/checkbox.svg) no-repeat;
+    padding-left: 24px;
+    background-size: 18px;
+  }
+
+  .icon {
+    background-repeat: no-repeat;
+    background-position: center;
+    width: 24px;
+    height: 24px;
+    display: inline-block;
+  }
+  .icon-trash {
+    background-image: url(/assets/trash.svg);
+  }
+  .icon-add {
+    background-image: url(/assets/add.svg);
+    color: var(--white-color);
+  }
+  .icon-close {
+    background-image: url(/assets/close.svg);
+  }
+  .icon-caret{
+    background-image: url(/assets/caret.svg);
+    background-size: 15px;
     cursor: pointer;
-    transform: rotate(-90deg);
+    transform: rotate(0deg);
     transition: transform 200ms;
   }
-  .fa-caret-down.visible {
-    transform: rotate(0deg);
+  .icon-caret.visible {
+    transform: rotate(90deg);
   }
 
   .watcher.control_buttons {
@@ -797,7 +829,7 @@
 
     <div id="watching">
       <div class="flex_wrapper h2">
-        Watch List <button class="primary" onClick="toggleModal('add_request_modal')"><i class="fa-solid fa-circle-plus"></i>&nbsp;Add watcher</button>
+        Watch List <button class="primary" onClick="toggleModal('add_request_modal')"><i class="icon icon-add"></i>&nbsp;Add watcher</button>
       </div>
       <div class="watch_list">
         <input type="checkbox" id="allow_das_control" onclick="onBundleChange()">
