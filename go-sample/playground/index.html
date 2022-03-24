@@ -435,21 +435,31 @@
             timeUpdater()
         }, 200);
 
+        if (!refreshedTimestamp) {
+          return
+        }
+
         var deltaDiv = document.getElementById("bundleUpdateDelta")
         // Until the first time we get a bundle timestamp, this will
         // throw an exception. That's OK though, since we already
         // scheduled ourself to run again later.
         var delta = Math.round(((new Date()) - refreshedTimestamp) / 1000)
-        deltaDiv.innerHTML = `Last updated: ${delta} seconds ago`
+
+        var dateString = refreshedTimestamp.toDateString()
+        var hours = refreshedTimestamp.getHours()
+        var minutes = refreshedTimestamp.getMinutes()
+        var ampm = hours >= 12 ? 'pm' : 'am'
+        hours = hours > 12 ? (hours - 12) : hours
+        deltaDiv.innerHTML = `Last updated: ${dateString} ${hours}:${minutes}${ampm}`
 
         // Update the CSS class of our div to color code based on how long it's
         // been since we got a bundle update.
         deltaDiv.className = "timedelta_short"
         if (delta > TIMEDELTA_MEDIUM) {
-            deltaDiv.className = "timedelta_medium"
+          deltaDiv.className = "timedelta_medium"
         }
         if (delta > TIMEDELTA_LONG) {
-            deltaDiv.className = "timedelta_long"
+          deltaDiv.className = "timedelta_long"
         }
     }
 
