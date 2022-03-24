@@ -16,32 +16,26 @@
         "subject": "alice",
         "action": "GET",
         "resource": "/cars",
-        "body": ""
       }, {
         "subject": "bob",
         "action": "GET",
         "resource": "/cars/car0",
-        "body": ""
       }, {
         "subject": "bob",
         "action": "POST",
         "resource": "/cars",
-        "body": ""
       }, {
         "subject": "",
         "action": "",
         "resource": "/entz-playground/buttons/samples",
-        "body": ""
       }, {
         "subject": "",
         "action": "",
         "resource": "/entz-playground/buttons/copy",
-        "body": ""
       }, {
         "subject": "",
         "action": "",
         "resource": "/entz-playground/buttons/remove",
-        "body": ""
       }
     ]
 
@@ -101,7 +95,7 @@
     }
 
 
-    function getDecision(subject, action, resource, body, callback, user) {
+    function getDecision(subject, action, resource, callback, user) {
         // Runs the callback with arguments (code, data, user) once the request
         // returns. The user field is used to exfiltrate data across callback
         // boundaries in certain contexts.
@@ -114,7 +108,6 @@
         if (subject  != null) {obj["subject"]  = subject}
         if (action   != null) {obj["action"]   = action}
         if (resource != null) {obj["resource"] = resource}
-        if (body     != null) {obj["body"]     = body}
 
         xhr.send(JSON.stringify(obj))
 
@@ -176,14 +169,12 @@
         var subject = document.getElementById("subjectInput").value
         var action = document.getElementById("actionInput").value
         var resource = document.getElementById("resourceInput").value
-        var body = document.getElementById("bodyInput").value
 
         if (subject  == "") {subject  = null}
         if (action   == "") {action   = null}
         if (resource == "") {resource = null}
-        if (body     == "") {body     = null}
 
-        getDecision(subject, action, resource, body, function(code, data, user) {
+        getDecision(subject, action, resource, function(code, data, user) {
             const resultsDiv = document.getElementById("results")
             resultsDiv.innerHTML = ''
             const resultsH2 = document.createElement("div")
@@ -233,12 +224,10 @@
         var subject = document.getElementById("subjectInput")
         var action = document.getElementById("actionInput")
         var resource = document.getElementById("resourceInput")
-        var body = document.getElementById("bodyInput")
 
         subject.value = ""
         action.value = ""
         resource.value = ""
-        body.value = ""
         editWatcherIndex = null
 
         const resultsDiv = document.getElementById("results")
@@ -250,8 +239,7 @@
       var subject = document.getElementById("subjectInput").value
       var action = document.getElementById("actionInput").value
       var resource = document.getElementById("resourceInput").value
-      var body = document.getElementById("bodyInput").value
-      var newWatcher = {subject, action, resource, body}
+      var newWatcher = {subject, action, resource}
 
       if (Number.isInteger(editWatcherIndex)) {
         watcherList[editWatcherIndex] = newWatcher
@@ -283,12 +271,10 @@
         var subject = getWatchedAttribute(num, "subject")
         var action = getWatchedAttribute(num, "action")
         var resource = getWatchedAttribute(num, "resource")
-        var body = getWatchedAttribute(num, "body")
 
         document.getElementById("subjectInput").value = subject
         document.getElementById("actionInput").value = action
         document.getElementById("resourceInput").value = resource
-        document.getElementById("bodyInput").value = body
 
         toggleModal('add_request_modal')
     }
@@ -331,9 +317,8 @@
             var subject = getWatchedAttribute(index, "subject")
             var action = getWatchedAttribute(index, "action")
             var resource = getWatchedAttribute(index, "resource")
-            var body = getWatchedAttribute(index, "body")
 
-            getDecision(subject, action, resource, body, function(code, data, user) {
+            getDecision(subject, action, resource, function(code, data, user) {
                 highlight(JSON.stringify(data?.response, null, 4), "json", function(resp) {
                   const respCode = document.createElement("code")
                   respCode.className = "watcherListResponse"
@@ -383,7 +368,7 @@
 
         // sample buttons
         if (control_allowed) {
-            getDecision(null, null, "/entz-playground/buttons/samples", null, function (code, data, user) {
+            getDecision(null, null, "/entz-playground/buttons/samples", function (code, data, user) {
                     if (code >= 400) {
                         user.innerHTML = "ERROR"
                         console.error(`got error code ${code}, result was: `, data)
@@ -396,7 +381,7 @@
             }, null)
 
             // copy buttons
-            getDecision(null, null, "/entz-playground/buttons/copy", null, function (code, data, user) {
+            getDecision(null, null, "/entz-playground/buttons/copy", function (code, data, user) {
                     if (code >= 400) {
                         user.innerHTML = "ERROR"
                         console.error(`got error code ${code}, result was: `, data)
@@ -409,7 +394,7 @@
             }, null)
 
             // remove buttons
-            getDecision(null, null, "/entz-playground/buttons/remove", null, function (code, data, user) {
+            getDecision(null, null, "/entz-playground/buttons/remove", function (code, data, user) {
                     if (code >= 400) {
                         user.innerHTML = "ERROR"
                         console.error(`got error code ${code}, result was: `, data)
@@ -649,7 +634,7 @@
 
   .body_wrapper {
     max-width: 800px;
-    margin: 30px auto;
+    margin: 30px auto 80px;
     padding: 10px;
   }
 
@@ -791,8 +776,6 @@
           <input width=500 id="actionInput" type="text" name="action"><br />
           <label>Resource</label><br />
           <input width=500 id="resourceInput" type="text" name="resource"><br />
-          <label>Body</label><br />
-          <input width=500 id="bodyInput" type="text" name="body"><br /><br />
           <div class="flex_wrapper">
             <div>
               <button class="primary" type="button" onclick="onPreview()">Preview</button>
