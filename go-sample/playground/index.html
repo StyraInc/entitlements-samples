@@ -745,24 +745,21 @@
       <div class="body">
         <p>Welcome to the Entitlements Playground! This tool allows you to
         experiment with different requests using the Entitlements object model.
-        Start filling the form fields below and then click the <b>Preview</b> button
-        to work on the object model. Try using the row of sample buttons above the
-        form to pre-populate the fields with some example values.</p>
+        Start by adding a new watcher or editing a current watcher. After filling
+        the form fields click the <b>Preview</b> button and then <b>Submit</b> when
+        satisfied with the watcher.</p>
 
-        <p>You can also watch a request. When you click the <b>Watch</b> button
-        below, the request data will be stored in the <b>Watch List</b> table below.
-        The <b>Allowed?</b> column will update in real-time according to policy
+        <p>To view watchers, look at the watch table. The <b>Status</b> column
+        will update in real-time according to policy
         changes made in the DAS to show whether that request would be allowed or
-        denied. You can use the <b>Copy</b> button to copy a row back into the form
+        denied. You can click the  <b>Edit</b> button to change watcher
         fields, allowing you to <b>Preview</b> it again and see the full response
-        from the DAS. The <b>Remove</b> button will delete the row from the
-        table.</p>
+        from the DAS. The trash button will delete the watcher from the table.</p>
 
-        <p>When "Allow DAS policy to control buttons" is checked, the sample
-        buttons above the form, and the <b>Copy</b> and <b>Remove</b> buttons for
-        each row in the <b>Watch List</b> table are controlled by Entitlements
-        policies. Each group of buttons can be enabled or disabled by creating a
-        policy to allow or deny access to the
+        <p>When "Allow DAS policy to control buttons" is checked, the <b>Copy</b>
+        and <b>Remove</b> buttons for each row in the <b>Watch List</b> table will
+        be controlled by Entitlements policies. Each group of buttons can be enabled
+        or disabled by creating a policy to allow or deny access to the
         <code>/entz-playground/buttons/samples</code>,
         <code>/entz-playground/buttons/copy</code>, or
         <code>/entz-playground/buttons/remove</code> respectively. </p>
@@ -791,7 +788,7 @@
               <button class="primary" type="button" onclick="onPreview()">Preview</button>
               <button class="secondary" type="button" onclick="onClear()">Clear form</button>
             </div>
-            <button class="primary" type="button" onclick="onWatch()">Create watcher</button>
+            <button class="primary" type="button" onclick="onWatch()">Submit</button>
           </div>
           <div id="results"></div>
         </div>
