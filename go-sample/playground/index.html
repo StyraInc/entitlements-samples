@@ -588,7 +588,8 @@
     background-size: 18px;
   }
   input[type=checkbox]:checked + label {
-    background: url(/assets/checkbox.svg) no-repeat;
+    background-image: url(/assets/checkbox.svg), url(/assets/checkbox_blank.svg);
+    background-repeat: no-repeat;
     padding-left: 24px;
     background-size: 18px;
   }
@@ -815,6 +816,7 @@
           <input width=500 id="actionInput" type="text" name="action"><br />
           <label>Resource</label><br />
           <input width=500 id="resourceInput" type="text" name="resource"><br />
+          <br/>
           <div class="flex_wrapper">
             <div>
               <button class="primary" type="button" onclick="onPreview()">Preview</button>
