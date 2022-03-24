@@ -16,32 +16,26 @@
         "subject": "alice",
         "action": "GET",
         "resource": "/cars",
-        "body": ""
       }, {
         "subject": "bob",
         "action": "GET",
         "resource": "/cars/car0",
-        "body": ""
       }, {
         "subject": "bob",
         "action": "POST",
         "resource": "/cars",
-        "body": ""
       }, {
         "subject": "",
         "action": "",
         "resource": "/entz-playground/buttons/samples",
-        "body": ""
       }, {
         "subject": "",
         "action": "",
         "resource": "/entz-playground/buttons/copy",
-        "body": ""
       }, {
         "subject": "",
         "action": "",
         "resource": "/entz-playground/buttons/remove",
-        "body": ""
       }
     ]
 
@@ -67,14 +61,13 @@
       headerRow.innerHTML += `<th>Subject</th>`
       headerRow.innerHTML += `<th>Action</th>`
       headerRow.innerHTML += `<th>Resource</th>`
-      headerRow.innerHTML += `<th>Body</th>`
       headerRow.innerHTML += `<th>Status</th>`
       watchTable.appendChild(headerRow)
 
       watcherList.forEach((singleWatcher, index) => {
         const watchRow = document.createElement("tr")
         const resultRow = document.createElement("tr")
-        const {subject, action, resource, body, response, isResultVisible} = singleWatcher || {}
+        const {subject, action, resource, response, isResultVisible} = singleWatcher || {}
         const caretClassName = isResultVisible ? "visible" : ""
 
         watchRow.className = "watcher"
@@ -85,7 +78,6 @@
         watchRow.innerHTML += `<td class=watcher data-watcher=${index} data-watcher-item=subject>${subject}</td>`
         watchRow.innerHTML += `<td class=watcher data-watcher=${index} data-watcher-item=action>${action}</td>`
         watchRow.innerHTML += `<td class=watcher data-watcher=${index} data-watcher-item=resource>${resource}</td>`
-        watchRow.innerHTML += `<td class=watcher data-watcher=${index} data-watcher-item=body>${body}</td>`
         watchRow.innerHTML += `<td class=watcher data-watcher=${index} data-watcher-item=allowed>...</td>`
         watchRow.innerHTML += `<td class="watcher control_buttons" data-watcher=${index}><button class=copy_button type="button" onclick="editWatcher(${index})">Edit</button> <button class=remove_button type="button" onclick="deleteWatcher(${index})"><i class="fa-solid fa-trash-can"></i></button></td>`
         watchTable.appendChild(watchRow)
@@ -93,7 +85,7 @@
         resultRow.className = "watcher_result"
         resultRow.setAttribute("data-watcher", index)
         resultRow.style.display = 'none'
-        resultRow.innerHTML = `<td colspan=7 class=watcher data-watcher=${index} data-watcher-item=result>RESULT HERE</td>`
+        resultRow.innerHTML = `<td colspan=6 class=watcher data-watcher=${index} data-watcher-item=result></td>`
 
         watchTable.appendChild(resultRow)
       })
@@ -103,7 +95,7 @@
     }
 
 
-    function getDecision(subject, action, resource, body, callback, user) {
+    function getDecision(subject, action, resource, callback, user) {
         // Runs the callback with arguments (code, data, user) once the request
         // returns. The user field is used to exfiltrate data across callback
         // boundaries in certain contexts.
@@ -116,7 +108,6 @@
         if (subject  != null) {obj["subject"]  = subject}
         if (action   != null) {obj["action"]   = action}
         if (resource != null) {obj["resource"] = resource}
-        if (body     != null) {obj["body"]     = body}
 
         xhr.send(JSON.stringify(obj))
 
@@ -132,7 +123,6 @@
     }
 
     function highlight(code, language, callback) {
-        debugger
         var xhr = new XMLHttpRequest()
         xhr.open("PUT", `/highlight/${language}`)
         xhr.setRequestHeader("Content-Type", "text/plain")
@@ -179,18 +169,16 @@
         var subject = document.getElementById("subjectInput").value
         var action = document.getElementById("actionInput").value
         var resource = document.getElementById("resourceInput").value
-        var body = document.getElementById("bodyInput").value
 
         if (subject  == "") {subject  = null}
         if (action   == "") {action   = null}
         if (resource == "") {resource = null}
-        if (body     == "") {body     = null}
 
-        getDecision(subject, action, resource, body, function(code, data, user) {
-
+        getDecision(subject, action, resource, function(code, data, user) {
             const resultsDiv = document.getElementById("results")
             resultsDiv.innerHTML = ''
-            const resultsH2 = document.createElement("h2")
+            const resultsH2 = document.createElement("div")
+            resultsH2.className = "h2"
             resultsH2.innerHTML = "Results"
             resultsDiv.appendChild(resultsH2)
 
@@ -236,12 +224,10 @@
         var subject = document.getElementById("subjectInput")
         var action = document.getElementById("actionInput")
         var resource = document.getElementById("resourceInput")
-        var body = document.getElementById("bodyInput")
 
         subject.value = ""
         action.value = ""
         resource.value = ""
-        body.value = ""
         editWatcherIndex = null
 
         const resultsDiv = document.getElementById("results")
@@ -253,8 +239,7 @@
       var subject = document.getElementById("subjectInput").value
       var action = document.getElementById("actionInput").value
       var resource = document.getElementById("resourceInput").value
-      var body = document.getElementById("bodyInput").value
-      var newWatcher = {subject, action, resource, body}
+      var newWatcher = {subject, action, resource}
 
       if (Number.isInteger(editWatcherIndex)) {
         watcherList[editWatcherIndex] = newWatcher
@@ -286,18 +271,19 @@
         var subject = getWatchedAttribute(num, "subject")
         var action = getWatchedAttribute(num, "action")
         var resource = getWatchedAttribute(num, "resource")
-        var body = getWatchedAttribute(num, "body")
 
         document.getElementById("subjectInput").value = subject
         document.getElementById("actionInput").value = action
         document.getElementById("resourceInput").value = resource
-        document.getElementById("bodyInput").value = body
 
         toggleModal('add_request_modal')
     }
 
     function getWatchedAttribute(num, attr) {
         const node = document.evaluate(`//td[@data-watcher='${num}' and @data-watcher-item='${attr}']`, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue
+        if (!node) {
+            return ''
+        }
         return node.innerHTML
     }
 
@@ -331,9 +317,8 @@
             var subject = getWatchedAttribute(index, "subject")
             var action = getWatchedAttribute(index, "action")
             var resource = getWatchedAttribute(index, "resource")
-            var body = getWatchedAttribute(index, "body")
 
-            getDecision(subject, action, resource, body, function(code, data, user) {
+            getDecision(subject, action, resource, function(code, data, user) {
                 highlight(JSON.stringify(data?.response, null, 4), "json", function(resp) {
                   const respCode = document.createElement("code")
                   respCode.className = "watcherListResponse"
@@ -346,7 +331,7 @@
 
                 if (code >= 400) {
                     user.innerHTML = "ERROR"
-                    console.log(`got error code ${code}, result was: `, data)
+                    console.error(`got error code ${code}, result was: `, data)
                     return
                 }
 
@@ -383,10 +368,10 @@
 
         // sample buttons
         if (control_allowed) {
-            getDecision(null, null, "/entz-playground/buttons/samples", null, function (code, data, user) {
+            getDecision(null, null, "/entz-playground/buttons/samples", function (code, data, user) {
                     if (code >= 400) {
                         user.innerHTML = "ERROR"
-                        console.log(`got error code ${code}, result was: `, data)
+                        console.error(`got error code ${code}, result was: `, data)
                         return
                     }
                     var buttons = document.getElementsByClassName("sample_button")
@@ -396,10 +381,10 @@
             }, null)
 
             // copy buttons
-            getDecision(null, null, "/entz-playground/buttons/copy", null, function (code, data, user) {
+            getDecision(null, null, "/entz-playground/buttons/copy", function (code, data, user) {
                     if (code >= 400) {
                         user.innerHTML = "ERROR"
-                        console.log(`got error code ${code}, result was: `, data)
+                        console.error(`got error code ${code}, result was: `, data)
                         return
                     }
                     var buttons = document.getElementsByClassName("copy_button")
@@ -409,10 +394,10 @@
             }, null)
 
             // remove buttons
-            getDecision(null, null, "/entz-playground/buttons/remove", null, function (code, data, user) {
+            getDecision(null, null, "/entz-playground/buttons/remove", function (code, data, user) {
                     if (code >= 400) {
                         user.innerHTML = "ERROR"
-                        console.log(`got error code ${code}, result was: `, data)
+                        console.error(`got error code ${code}, result was: `, data)
                         return
                     }
                     var buttons = document.getElementsByClassName("remove_button")
@@ -509,8 +494,8 @@
     --danger-color: #db3737;
     --gray-color: #99a6b138;
     --text-color: #182026;
-    --background-color: #E2E8EC;
-    --white: #FFFFFF;
+    --background-color: #EBF1F5;
+    --white-color: #F5F8FA;
   }
 
   body {
@@ -547,12 +532,12 @@
 
   button.primary {
     background-color: var(--primary-color);
-    color: var(--white);
+    color: var(--white-color);
   }
 
   button.secondary {
     background-color: var(--secondary-color);
-    color: var(--white);
+    color: var(--white-color);
   }
 
   label[for] {
@@ -563,7 +548,7 @@
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
-    background: var(--white);
+    background: var(--white-color);
     border: none;
     border-radius: 3px;
     -webkit-box-shadow: 0 0 0 0 rgb(19 124 189 / 0%), 0 0 0 0 rgb(19 124 189 / 0%), inset 0 0 0 1px rgb(16 22 26 / 15%), inset 0 1px 1px rgb(16 22 26 / 20%);
@@ -606,27 +591,34 @@
 
   .allowed {
       background-color: var(--success-color);
-      color: white;
+      color: var(--white-color);
   }
   .denied {
       background-color: var(--danger-color);
-      color: white;
+      color: var(--white-color);
   }
   .timedelta_short {
       background-color: var(--success-color);
-      color: white;
+      color: var(--white-color);
   }
   .timedelta_medium {
       background-color: var(--warning-color);
-      color: white;
+      color: var(--white-color);
   }
   .timedelta_long {
       background-color: var(--danger-color);
-      color: white;
+      color: var(--white-color);
   }
 
   .watcherListResponse {
     padding: 10px;
+  }
+
+  table {
+    background-color: var(--white-color);
+    padding: 20px;
+    border-radius: 6px;
+    width: 100%;
   }
 
   code pre {
@@ -642,7 +634,7 @@
 
   .body_wrapper {
     max-width: 800px;
-    margin: 30px auto;
+    margin: 30px auto 80px;
     padding: 10px;
   }
 
@@ -650,34 +642,46 @@
     position: fixed;
     max-height: 80vh;
     box-sizing: border-box;
-    padding: 30px;
     display: block;
-    background: white;
-    border: 1px solid black;
+    background: var(--background-color);
     margin: auto;
     max-width: 600px;
     left: 0;
     right: 0;
     z-index: 1;
+    border-radius: 6px;
+  }
+
+  .popup_modal .header {
+    background: var(--white-color);
+    padding: 20px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+    font-size: 1.5em;
+    border-radius: 6px;
+  }
+
+  .popup_modal .body {
+    padding: 20px 30px;
   }
 
   .popup_modal .close_button::after {
     content: '×';
-    position: absolute;
-    top: 0;
-    right: 0;
-    padding: 45px 30px 20px 20px;
     cursor: pointer;
-    font-weight: 600;
-    font-size: 1.5em;
+  }
+
+  .watch_list {
+    text-align: right;
+  }
+
+  .h2 {
+    font-size: 28px;
   }
 
   button {
     cursor: pointer;
-  }
-
-  table {
-    width: 100%;
   }
 
   th {
@@ -723,69 +727,76 @@
   <h1>Entitlements Playground <a class="info_icon" onClick="event.preventDefault(); toggleModal('introduction_modal')">ⓘ</a></h1>
 
     <div class="popup_modal" id="introduction_modal" style="display: none;" onClick="event.stopPropagation()">
-      <div class="close_button" onClick="toggleModal('introduction_modal')"></div>
-      <h2>Instructions</h2>
+      <div class="header">
+        <div>Instructions</div>
+        <div class="close_button" onClick="toggleModal('introduction_modal')"></div>
+      </div>
 
-      <p>Welcome to the Entitlements Playground! This tool allows you to
-      experiment with different requests using the Entitlements object model.
-      Start filling the form fields below and then click the <b>Preview</b> button
-      to work on the object model. Try using the row of sample buttons above the
-      form to pre-populate the fields with some example values.</p>
+      <div class="body">
+        <p>Welcome to the Entitlements Playground! This tool allows you to
+        experiment with different requests using the Entitlements object model.
+        Start filling the form fields below and then click the <b>Preview</b> button
+        to work on the object model. Try using the row of sample buttons above the
+        form to pre-populate the fields with some example values.</p>
 
-      <p>You can also watch a request. When you click the <b>Watch</b> button
-      below, the request data will be stored in the <b>Watch List</b> table below.
-      The <b>Allowed?</b> column will update in real-time according to policy
-      changes made in the DAS to show whether that request would be allowed or
-      denied. You can use the <b>Copy</b> button to copy a row back into the form
-      fields, allowing you to <b>Preview</b> it again and see the full response
-      from the DAS. The <b>Remove</b> button will delete the row from the
-      table.</p>
+        <p>You can also watch a request. When you click the <b>Watch</b> button
+        below, the request data will be stored in the <b>Watch List</b> table below.
+        The <b>Allowed?</b> column will update in real-time according to policy
+        changes made in the DAS to show whether that request would be allowed or
+        denied. You can use the <b>Copy</b> button to copy a row back into the form
+        fields, allowing you to <b>Preview</b> it again and see the full response
+        from the DAS. The <b>Remove</b> button will delete the row from the
+        table.</p>
 
-      <p>When "Allow DAS policy to control buttons" is checked, the sample
-      buttons above the form, and the <b>Copy</b> and <b>Remove</b> buttons for
-      each row in the <b>Watch List</b> table are controlled by Entitlements
-      policies. Each group of buttons can be enabled or disabled by creating a
-      policy to allow or deny access to the
-      <code>/entz-playground/buttons/samples</code>,
-      <code>/entz-playground/buttons/copy</code>, or
-      <code>/entz-playground/buttons/remove</code> respectively. </p>
+        <p>When "Allow DAS policy to control buttons" is checked, the sample
+        buttons above the form, and the <b>Copy</b> and <b>Remove</b> buttons for
+        each row in the <b>Watch List</b> table are controlled by Entitlements
+        policies. Each group of buttons can be enabled or disabled by creating a
+        policy to allow or deny access to the
+        <code>/entz-playground/buttons/samples</code>,
+        <code>/entz-playground/buttons/copy</code>, or
+        <code>/entz-playground/buttons/remove</code> respectively. </p>
 
-      <p><b>TIP:</b>Because the DAS has a default-deny policy, these buttons will
-      be disabled until you create a policy in your DAS that allows them.</p>
+        <p><b>TIP:</b>Because the DAS has a default-deny policy, these buttons will
+        be disabled until you create a policy in your DAS that allows them.</p>
+      </div>
     </div>
 
     <div class="popup_modal" id="add_request_modal" style="display: none;" onClick="event.stopPropagation()">
-      <div class="close_button" onClick="toggleModal('add_request_modal')"></div>
-      <h2>Edit Watcher</h2>
+      <div class="header">
+        <div>Edit Watcher</div>
+        <div class="close_button" onClick="toggleModal('add_request_modal')"></div>
+      </div>
 
-      <div id="requestEntry">
-        <label>Subject</label><br />
-        <input width=500 id="subjectInput" type="text" name="subject"><br />
-        <label>Action</label><br />
-        <input width=500 id="actionInput" type="text" name="action"><br />
-        <label>Resource</label><br />
-        <input width=500 id="resourceInput" type="text" name="resource"><br />
-        <label>Body</label><br />
-        <input width=500 id="bodyInput" type="text" name="body"><br /><br />
-        <div class="flex_wrapper">
-          <div>
-            <button class="primary" type="button" onclick="onPreview()">Preview</button>
-            <button class="secondary" type="button" onclick="onClear()">Clear form</button>
+      <div class="body">
+        <div id="requestEntry">
+          <label>Subject</label><br />
+          <input width=500 id="subjectInput" type="text" name="subject"><br />
+          <label>Action</label><br />
+          <input width=500 id="actionInput" type="text" name="action"><br />
+          <label>Resource</label><br />
+          <input width=500 id="resourceInput" type="text" name="resource"><br />
+          <div class="flex_wrapper">
+            <div>
+              <button class="primary" type="button" onclick="onPreview()">Preview</button>
+              <button class="secondary" type="button" onclick="onClear()">Clear form</button>
+            </div>
+            <button class="primary" type="button" onclick="onWatch()">Create watcher</button>
           </div>
-          <button class="primary" type="button" onclick="onWatch()">Create watcher</button>
+          <div id="results"></div>
         </div>
-        <div id="results"></div>
       </div>
     </div>
 
     <div id="watching">
-      <h2 class="flex_wrapper">
-        Watch List <button class="primary" onClick="toggleModal('add_request_modal')">New watcher</button>
-      </h2>
-      <input type="checkbox" id="allow_das_control" onclick="onBundleChange()">
-      <label for="allow_das_control">Allow DAS policy to control buttons.</label><br/><br/><br/>
+      <div class="flex_wrapper h2">
+        Watch List <button class="primary" onClick="toggleModal('add_request_modal')"><i class="fa-solid fa-circle-plus"></i>&nbsp;Add watcher</button>
+      </div>
+      <div class="watch_list">
+        <input type="checkbox" id="allow_das_control" onclick="onBundleChange()">
+        <label for="allow_das_control">Allow DAS policy to control buttons.</label><br/><br/><br/>
+      </div>
       <table id="watchingTable">
-        <tr><th>Subject</th><th>Action</th><th>Resource</th><th>Body</th><th>Allowed?</th><th></th><th></th></tr>
       </table>
     </div>
 
