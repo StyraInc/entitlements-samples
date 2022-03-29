@@ -78,7 +78,7 @@
         watchRow.innerHTML += `<td class=watcher data-watcher=${index} data-watcher-item=action>${action}</td>`
         watchRow.innerHTML += `<td class=watcher data-watcher=${index} data-watcher-item=resource>${resource}</td>`
         watchRow.innerHTML += `<td class=watcher data-watcher=${index} data-watcher-item=allowed>...</td>`
-        watchRow.innerHTML += `<td class="watcher control_buttons" data-watcher=${index}><button class=copy_button type="button" onclick="editWatcher(${index})">Edit</button> <button class=remove_button type="button" onclick="deleteWatcher(${index})"><i class="icon icon-trash"></i></button></td>`
+        watchRow.innerHTML += `<td class="watcher control_buttons" data-watcher=${index}><button class=copy_button type="button" onclick="editWatcher(${index})">Edit</button> <button class=copy_button type="button" onclick="copyWatcher(${index})">Copy</button> <button class=remove_button type="button" onclick="deleteWatcher(${index})"><i class="icon icon-trash"></i></button></td>`
         watchTable.appendChild(watchRow)
 
         resultRow.className = "watcher_result"
@@ -261,6 +261,18 @@
       }
 
       renderAllWatchers()
+    }
+
+    function copyWatcher(num) {
+        var subject = getWatchedAttribute(num, "subject")
+        var action = getWatchedAttribute(num, "action")
+        var resource = getWatchedAttribute(num, "resource")
+
+        document.getElementById("subjectInput").value = subject
+        document.getElementById("actionInput").value = action
+        document.getElementById("resourceInput").value = resource
+
+        toggleModal('add_request_modal')
     }
 
     function editWatcher(num) {
@@ -626,6 +638,10 @@
     text-align: right;
   }
 
+  .watcher.control_buttons button {
+    height: 35px;
+  }
+
   .watcher p {
     padding: 5px;
     text-transform: uppercase;
@@ -818,10 +834,7 @@
           <input width=500 id="resourceInput" type="text" name="resource"><br />
           <br/>
           <div class="flex_wrapper">
-            <div>
-              <button class="primary" type="button" onclick="onPreview()">Preview</button>
-              <button class="secondary" type="button" onclick="onClear()">Clear form</button>
-            </div>
+            <button type="button" onclick="onPreview()">Preview</button>
             <button class="primary" type="button" onclick="onWatch()">Submit</button>
           </div>
           <div id="results"></div>
