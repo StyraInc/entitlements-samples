@@ -26,7 +26,7 @@
       }, {
         "subject": "",
         "action": "",
-        "resource": "/entz-playground/buttons/samples",
+        "resource": "/entz-playground/buttons/edit",
       }, {
         "subject": "",
         "action": "",
@@ -78,7 +78,7 @@
         watchRow.innerHTML += `<td class=watcher data-watcher=${index} data-watcher-item=action>${action}</td>`
         watchRow.innerHTML += `<td class=watcher data-watcher=${index} data-watcher-item=resource>${resource}</td>`
         watchRow.innerHTML += `<td class=watcher data-watcher=${index} data-watcher-item=allowed>...</td>`
-        watchRow.innerHTML += `<td class="watcher control_buttons" data-watcher=${index}><button class=copy_button type="button" onclick="editWatcher(${index})">Edit</button> <button class=copy_button type="button" onclick="copyWatcher(${index})">Copy</button> <button class=remove_button type="button" onclick="deleteWatcher(${index})"><i class="icon icon-trash"></i></button></td>`
+        watchRow.innerHTML += `<td class="watcher control_buttons" data-watcher=${index}><button class=edit_button type="button" onclick="editWatcher(${index})">Edit</button> <button class=copy_button type="button" onclick="copyWatcher(${index})">Copy</button> <button class=remove_button type="button" onclick="deleteWatcher(${index})"><i class="icon icon-trash"></i></button></td>`
         watchTable.appendChild(watchRow)
 
         resultRow.className = "watcher_result"
@@ -356,13 +356,13 @@
 
         control_allowed = document.getElementById("allow_das_control").checked
 
-        // We also want the 'remove', 'copy', and 'sample' buttons to be
+        // We also want the 'remove', 'copy', and 'edit' buttons to be
         // able to be enabled and disabled by policies.
         //
         // The relevant policy request include only the resource, which
         // will be a path such as
         //
-        //     "entz-playground/buttons/samples"
+        //     "entz-playground/buttons/edit"
         //
         // Or
         //
@@ -377,15 +377,15 @@
         // pretty demo, NOT a demonstration of the correct way to implement
         // entitlements.
 
-        // sample buttons
+        // edit buttons
         if (control_allowed) {
-            getDecision(null, null, "/entz-playground/buttons/samples", function (code, data, user) {
+            getDecision(null, null, "/entz-playground/buttons/edit", function (code, data, user) {
                     if (code >= 400) {
                         user.innerHTML = "ERROR"
                         console.error(`got error code ${code}, result was: `, data)
                         return
                     }
-                    var buttons = document.getElementsByClassName("sample_button")
+                    var buttons = document.getElementsByClassName("edit_button")
                     for (var i = 0 ; i < buttons.length; i++) {
                         buttons[i].disabled = !data.allowed
                     }
@@ -418,7 +418,7 @@
             }, null)
 
         } else {
-            var buttons = document.getElementsByClassName("sample_button")
+            var buttons = document.getElementsByClassName("edit_button")
             for (var i = 0 ; i < buttons.length; i++) {
                 buttons[i].disabled = false
             }
@@ -798,27 +798,21 @@
       <div class="body">
         <p>Welcome to the Entitlements Playground! This tool allows you to
         experiment with different requests using the Entitlements object model.
-        Start by adding a new watcher or editing a current watcher. After filling
-        the form fields click the <b>Preview</b> button and then <b>Submit</b> when
-        satisfied with the watcher.</p>
+        The interface is pre-populated with a few examples. You can click the
+        '&gt;' symbol next to any request to see the corresponding response
+        from OPA. You can use "Edit" to modify a request in-place, or "Copy" to
+        create a new one based on an existing one.
+        </p>
 
-        <p>To view watchers, look at the watch table. The <b>Status</b> column
-        will update in real-time according to policy
-        changes made in the DAS to show whether that request would be allowed or
-        denied. You can click the  <b>Edit</b> button to change watcher
-        fields, allowing you to <b>Preview</b> it again and see the full response
-        from the DAS. The trash button will delete the watcher from the table.</p>
-
-        <p>When "Allow DAS policy to control buttons" is checked, the <b>Copy</b>
-        and <b>Remove</b> buttons for each row in the <b>Watch List</b> table will
-        be controlled by Entitlements policies. Each group of buttons can be enabled
-        or disabled by creating a policy to allow or deny access to the
-        <code>/entz-playground/buttons/samples</code>,
+        <p>When "Allow DAS policy to control buttons" is checked, the
+        <b>Edit</b>, <b>Copy</b> and <b>Remove</b> buttons for each row in the
+        <b>Watch List</b> table will be controlled by Entitlements policies.
+        Each group of buttons can be enabled or disabled by creating a policy
+        to allow or deny access to the
+        <code>/entz-playground/buttons/edit</code>,
         <code>/entz-playground/buttons/copy</code>, or
-        <code>/entz-playground/buttons/remove</code> respectively. </p>
-
-        <p><b>TIP:</b>Because the DAS has a default-deny policy, these buttons will
-        be disabled until you create a policy in your DAS that allows them.</p>
+        <code>/entz-playground/buttons/remove</code> resources respectively.
+        </p>
       </div>
     </div>
 
