@@ -148,6 +148,8 @@ set +u
 if [ -z "$TEST" ] ; then
 	# the test scripts wants a blank database
 	cp /src/entitlements-samples/data.json ./
+else
+	rm -f data.json
 fi
 set -u
 sh -c "$RUN_COMMAND" >> /var/log/carinfoserver.log 2>&1 &
@@ -162,7 +164,8 @@ export WELCOME="/src/entitlements-samples/welcome.txt"
 
 set +u
 if [ ! -z "$TEST" ] ; then
-	sh -c "sleep 2 ; tmux send-keys \"pytest /src/entitlements-samples/tests\" Enter" &
+	sh -c "sleep 2 ; tmux send-keys \"echo 'sleeping 15s to give the server time to spin up...'\" Enter" &
+	sh -c "sleep 15 ; tmux send-keys \"pytest /src/entitlements-samples/tests\" Enter" &
 fi
 set -u
 
