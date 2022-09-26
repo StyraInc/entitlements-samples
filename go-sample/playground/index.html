@@ -337,6 +337,15 @@
 
                   const node = document.querySelectorAll(`.watcher[data-watcher-item=result][data-watcher="${index}"]`)[0]
                   node.innerHTML = ''
+
+                  var subject = getWatchedAttribute(index, "subject")
+                  var action = getWatchedAttribute(index, "action")
+                  var resource = getWatchedAttribute(index, "resource")
+
+                  const curlCommand = document.createElement("div")
+                  curlCommand.innerHTML = `<p class=curl_command>Equivelant curl command (for use with local OPA): <code>curl -H "Content-Type: application/json" -X POST --data '{"subject": "${subject}", "resource": "${resource}", "action": "${action}"}' http://localhost:8181/v1/data/main/main</code></p>`
+                  node.appendChild(curlCommand)
+
                   node.appendChild(respCode)
                 })
 
@@ -650,6 +659,13 @@
     padding: 5px;
     text-transform: uppercase;
     font-weight: 600;
+  }
+
+  p.curl_command {
+    padding: 0px;
+    text-transform: none;
+    font-weight: normal;
+    margin: auto;
   }
 
   .allowed {
