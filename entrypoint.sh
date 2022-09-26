@@ -113,7 +113,7 @@ elif [ "$SAMPLE_APP" = "go-sdksample" ] ; then
 elif [ "$SAMPLE_APP" = "entz-playground" ] ; then
 	TARGET_DIR=/src/entitlements-samples/go-sample
 	RUN_COMMAND="./carinfoserver --mode sdk --playground --port $API_PORT --config '$TARGET_DIR/opa-conf.yaml'"
-	LAUNCH_OPA=NO
+	LAUNCH_OPA=SILENT
 
 else
 	echo "don't know how to run sample app '$SAMPLE_APP'" 1>&2
@@ -137,7 +137,7 @@ if [ "$(wc -l < opa-conf.yaml)" -lt 2 ] ; then
 fi
 echo "DONE"
 
-if [ "$LAUNCH_OPA" = "YES" ] ; then
+if [ "$LAUNCH_OPA" = "YES" ] || [ "$LAUNCH_OPA" = "SILENT" ] ; then
 	printf "launching OPA server... "
 	opa run --server --config-file=opa-conf.yaml >> /var/log/opa-server.log 2>&1 &
 	echo "DONE"

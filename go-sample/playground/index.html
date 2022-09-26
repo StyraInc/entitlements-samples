@@ -343,7 +343,12 @@
                   var resource = getWatchedAttribute(index, "resource")
 
                   const curlCommand = document.createElement("div")
-                  curlCommand.innerHTML = `<p class=curl_command>Equivelant curl command (for use with local OPA): <code>curl -H "Content-Type: application/json" -X POST --data '{"subject": "${subject}", "resource": "${resource}", "action": "${action}"}' http://localhost:8181/v1/data/main/main</code></p>`
+                  var curlData = {"input": {}}
+                  if (subject != "") {curlData["input"]["subject"] = subject}
+                  if (resource != "") {curlData["input"]["resource"] = resource}
+                  if (action != "") {curlData["input"]["action"] = action}
+                  var curlDataString = JSON.stringify(curlData, null, null)
+                  curlCommand.innerHTML = `<p class=curl_command>Equivelant curl command (for use with local OPA): <code>curl -LSs -H "Content-Type: application/json" -X POST --data '${curlDataString}' http://localhost:8181/v1/data/main/main</code></p>`
                   node.appendChild(curlCommand)
 
                   node.appendChild(respCode)
