@@ -354,9 +354,8 @@
                   if (action != "") {curlData["input"]["action"] = action}
                   var curlDataString = JSON.stringify(curlData, null, null)
                   var curlCommandText = `curl -LSs -H "Content-Type: application/json" -X POST --data " ${curlDataString} http://localhost:8181/v1/data/main/main`.replace(/"/g, '&quot;');
-                  curlCommand.innerHTML = `<p class=curl_command>Equivelant curl command (for use with local OPA): <code>${curlCommandText}</code></p><button class=copy_bttn type="button" onclick="copyCurlCommand('${curlCommandText}')">Copy</button>`
+                  curlCommand.innerHTML = `<p class=curl_command>Equivelant curl command (for use with local OPA):<code>${curlCommandText}</code></p><button class=copy_bttn type="button" onclick="copyCurlCommand('${curlCommandText}')">Copy</button>`
                   node.appendChild(curlCommand)
-
                   node.appendChild(respCode)
                 })
 
@@ -840,6 +839,9 @@
     padding: 5px 10px;
   }
 
+  code {
+    display: block;
+  }
 
 </style>
 
