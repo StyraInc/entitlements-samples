@@ -339,7 +339,7 @@
                   respCode.className = "watcherListResponse"
                   respCode.innerHTML = resp
 
-                  const node = document.querySelectorAll(`.watcher[data-watcher-item=result][data-watcher="${index}"]`)[0]
+                  const [node] = document.querySelectorAll(`.watcher[data-watcher-item=result][data-watcher="${index}"]`)
                   node.innerHTML = ''
 
                   var subject = getWatchedAttribute(index, "subject")
