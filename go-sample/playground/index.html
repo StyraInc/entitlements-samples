@@ -317,6 +317,10 @@
 
     }
 
+    function copyCurlCommand(curlCommand) {
+      navigator.clipboard.writeText(curlCommand);
+    }
+
     function onBundleChange() {
         var xpathIter = document.evaluate("//td[@data-watcher and @data-watcher-item='allowed']", document, null, XPathResult.ANY_TYPE, null)
         while (true) {
@@ -335,8 +339,22 @@
                   respCode.className = "watcherListResponse"
                   respCode.innerHTML = resp
 
-                  const node = document.querySelectorAll(`.watcher[data-watcher-item=result][data-watcher="${index}"]`)[0]
+                  const [node] = document.querySelectorAll(`.watcher[data-watcher-item=result][data-watcher="${index}"]`)
                   node.innerHTML = ''
+
+                  var subject = getWatchedAttribute(index, "subject") || undefined
+                  var action = getWatchedAttribute(index, "action") || undefined
+                  var resource = getWatchedAttribute(index, "resource") || undefined
+
+                  const curlCommand = document.createElement("div")
+                  curlCommand.classList.add("curl_block");
+                  var curlData = {
+                    input: { subject, resource, action }
+                  }
+                  var curlDataString = JSON.stringify(curlData, null, null)
+                  var curlCommandText = `curl -LSs -H "Content-Type: application/json" -X POST --data " ${curlDataString} http://localhost:8181/v1/data/main/main`.replace(/"/g, '&quot;');
+                  curlCommand.innerHTML = `<p class=curl_command>Equivelant curl command (for use with local OPA):<code>${curlCommandText}</code></p><button class=copy_bttn type="button" onclick="copyCurlCommand('${curlCommandText}')">Copy</button>`
+                  node.appendChild(curlCommand)
                   node.appendChild(respCode)
                 })
 
@@ -652,6 +670,13 @@
     font-weight: 600;
   }
 
+  p.curl_command {
+    padding: 0px;
+    text-transform: none;
+    font-weight: normal;
+    margin: 0 auto;
+  }
+
   .allowed {
       background-color: var(--success-color);
       color: var(--white-color);
@@ -783,6 +808,40 @@
     text-decoration: none;
     cursor: pointer;
   }
+
+  .curl_block {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+  }
+
+  table {
+    width: 800px;
+  }
+
+  table tr td {
+    height: auto;
+    width: fit-content;
+  }
+
+  table tr td:nth-of-type(1) {
+    width: 33px;
+  }
+
+  .copy_bttn {
+    text-align: center;
+    height: 35px;
+    width: 52px;
+    min-width: 52px;
+    padding: 5px 10px;
+  }
+
+  code {
+    display: block;
+  }
+
 </style>
 
 <div class="body_wrapper">

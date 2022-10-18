@@ -125,3 +125,58 @@ scripts [tmux](https://github.com/tmux/tmux/wiki) to display panes
 also providing the user with an interactive terminal. In essence, this is a
 bunch of window dressing on top of running an OPA server and then launching the
 selected sample app.
+
+## The Entitlements Playground
+
+When running the sample application `entz-playground`, you will be presented
+with a web UI on the `API_PORT` port (8123 by default) that will allow you to
+view in real-time the result of various entitlements requests. The outcome of
+each request is shown as a separate row, and will update in real-time as you
+modify the policy in DAS. If you click the caret symbol (`>`) on the left of a
+row, it will expand to show you the full JSON response received from OPA for
+the request, as well as the equivalent `curl` command to run that request
+against an instance of OPA configured with your Entitlements policy (e.g. via
+the "OPA CLI" installation instructions for your Entitlements system in Styra
+DAS).
+
+You can find an appropriate command to launch the Entitlements Playground in
+the "Entitlements Playground" installation instructions for your Entitlements
+system. An example might look like:
+
+```sh
+docker run \
+	-i \
+	-p 8080:8080 \
+	-p 8123:8123 \
+	-e SAMPLE_APP=entz-playground \
+	-e DOCS_PORT=8080 \
+	-e API_PORT=8123 \
+	-e DAS_TOKEN='CHANGEME'
+	-e DAS_URL='https://CHANGEME.styra.com/' \
+	-e DAS_SYSTEM='CHANGEME' \
+	-t styra/entitlements-samples:latest
+```
+
+The Entitlements Playground includes a few example requests by default, which
+are designed to work with the sample data provided with the Entitlements system
+type. The default requests are as follows:
+
+| Subject | Action | Resource                          |
+|---------|--------|-----------------------------------|
+| `alice` | `GET`  | `/cars`                           |
+| `bob`   | `GET`  | `/cars/car0`                      |
+| `bob`   | `POST` | `/cars`                           |
+|         |        | `/entz-playground/buttons/edit`   |
+|         |        | `/entz-playground/buttons/copy`   |
+|         |        | `/entz-playground/buttons/remove` |
+
+From top to bottom, these correspond to the following `curl` commands, if you
+were to run them against a local OPA instance configured according to the "OPA
+CLI" installation instructions for your Entitlements system:
+
+* `curl -LSs -H "Content-Type: application/json" -X POST --data '{"input":{"subject":"alice","resource":"/cars","action":"GET"}}' http://localhost:8181/v1/data/main/main`
+* `curl -LSs -H "Content-Type: application/json" -X POST --data '{"input":{"subject":"bob","resource":"/cars/car0","action":"GET"}}' http://localhost:8181/v1/data/main/main`
+* `curl -LSs -H "Content-Type: application/json" -X POST --data '{"input":{"subject":"bob","resource":"/cars","action":"POST"}}' http://localhost:8181/v1/data/main/main`
+* `curl -LSs -H "Content-Type: application/json" -X POST --data '{"input":{"resource":"/entz-playground/buttons/edit"}}' http://localhost:8181/v1/data/main/main`
+* `curl -LSs -H "Content-Type: application/json" -X POST --data '{"input":{"resource":"/entz-playground/buttons/copy"}}' http://localhost:8181/v1/data/main/main`
+* `curl -LSs -H "Content-Type: application/json" -X POST --data '{"input":{"resource":"/entz-playground/buttons/remove"}}' http://localhost:8181/v1/data/main/main`

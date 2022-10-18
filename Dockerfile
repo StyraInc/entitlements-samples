@@ -41,13 +41,12 @@ RUN apt-get update && \
 	rm -f /usr/local/*.tar.gz
 
 # Install OPA from static binary according to the detected CPU arch.
-RUN OPA_VERSION=v0.37.2 && \
+RUN OPA_VERSION=v0.45.0 && \
 	URL="ERROR" && \
 	if   [ "$(arch)" = "aarch64" ] ; then URL="https://github.com/open-policy-agent/opa/releases/download/$OPA_VERSION/opa_linux_arm64_static" ; \
 	elif [ "$(arch)" = "x86_64"  ] ; then URL="https://github.com/open-policy-agent/opa/releases/download/$OPA_VERSION/opa_linux_amd64_static"  ; \
 	else echo "Don't know where to get OPA for architecture '$(arch)'" ; exit 1 ; fi && \
 	curl -LSs -o /usr/local/bin/opa "$URL" && chmod +x /usr/local/bin/opa
-
 
 # Copy in the source code for our samples, plus the entrypoint script
 RUN mkdir -p /src/entitlements-samples/go-sample && \
