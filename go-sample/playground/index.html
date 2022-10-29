@@ -318,7 +318,8 @@
     }
 
     function copyCurlCommand(curlCommand) {
-      navigator.clipboard.writeText(curlCommand);
+      const converted = curlCommand.replace(/\22/g, '"').replace(/\27/g, "'")
+      navigator.clipboard.writeText(converted);
     }
 
     function onBundleChange() {
@@ -353,8 +354,9 @@
                   if (resource != "") {curlData["input"]["resource"] = resource}
                   if (action != "") {curlData["input"]["action"] = action}
                   var curlDataString = JSON.stringify(curlData, null, null)
-                  var curlCommandText = `curl -LSs -H "Content-Type: application/json" -X POST --data " ${curlDataString} http://localhost:8181/v1/data/main/main`.replace(/"/g, '&quot;');
-                  curlCommand.innerHTML = `<p class=curl_command>Equivelant curl command (for use with local OPA):<code>${curlCommandText}</code></p><button class=copy_bttn type="button" onclick="copyCurlCommand('${curlCommandText}')">Copy</button>`
+                  var curlCommandText = `curl -LSs -H "Content-Type: application/json" -X POST --data '${curlDataString}' http://localhost:8181/v1/data/main/main`;
+                  var curlCommandTextEncoded = curlCommandText.replace(/"/g, '\22').replace(/'/g, '\27');
+                  curlCommand.innerHTML = `<p class=curl_command>Equivelant curl command (for use with local OPA):<code>${curlCommandText}</code></p><button class=copy_bttn type="button" onclick="copyCurlCommand('${curlCommandTextEncoded}')">Copy</button>`
                   node.appendChild(curlCommand)
                   node.appendChild(respCode)
                 })
