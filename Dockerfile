@@ -41,7 +41,7 @@ RUN apt-get update && \
 	rm -f /usr/local/*.tar.gz
 
 # Install OPA from static binary according to the detected CPU arch.
-RUN OPA_VERSION=v0.45.0 && \
+RUN OPA_VERSION=v0.44.0 && \
 	URL="ERROR" && \
 	if   [ "$(arch)" = "aarch64" ] ; then URL="https://github.com/open-policy-agent/opa/releases/download/$OPA_VERSION/opa_linux_arm64_static" ; \
 	elif [ "$(arch)" = "x86_64"  ] ; then URL="https://github.com/open-policy-agent/opa/releases/download/$OPA_VERSION/opa_linux_amd64_static"  ; \
