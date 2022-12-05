@@ -22,25 +22,25 @@ locally.
 To build locally:
 
 ```
-$ docker build -t styra/entitlements-samples:vlocal .
+docker build -t styra/entitlements-samples:vlocal .
 ```
 
 To download the image (**substantially faster**):
 
 ```
-$ docker pull styra/entitlements-samples:latest
+docker pull styra/entitlements-samples:latest
 ```
 
 An example of running the Python sample application would be:
 
 ```
 $ docker run -it \
-	-p 8080:8080 -p 8123:8123 -e DOCS_PORT=8080 -e API_PORT=8123 \
-	-e SAMPLE_APP=python-httpsample \
-	-e DAS_TOKEN='CHANGEME' \
-	-e DAS_URL='https://CHANGEME.styra.com/' \
-	-e DAS_SYSTEM='CHANGEME' \
-	styra/entitlements-samples:latest
+ -p 8080:8080 -p 8123:8123 -e DOCS_PORT=8080 -e API_PORT=8123 \
+ -e SAMPLE_APP=python-httpsample \
+ -e DAS_TOKEN='CHANGEME' \
+ -e DAS_URL='https://CHANGEME.styra.com/' \
+ -e DAS_SYSTEM='CHANGEME' \
+ styra/entitlements-samples:latest
 ```
 
 Use `styra/entitlements-samples:vlocal` instead of
@@ -52,7 +52,7 @@ corner of the screen while you have the system in question selected in the DAS,
 it should be a long sequence of letters and numbers such as
 `ca8cef0d13134065bd7481f56f05537c`.
 
-You can create a token (`DAS_TOKEN`) via Workspace->Settings->API Tokens.
+You can create a token (`DAS_TOKEN`) via Workspace->Access Control->API Tokens.
 
 Alternatively, if you view the quickstart for the "Entitlements" system type,
 your DAS instance will automatically generate you an appropriate `docker run`
@@ -145,16 +145,16 @@ system. An example might look like:
 
 ```sh
 docker run \
-	-i \
-	-p 8080:8080 \
-	-p 8123:8123 \
-	-e SAMPLE_APP=entz-playground \
-	-e DOCS_PORT=8080 \
-	-e API_PORT=8123 \
-	-e DAS_TOKEN='CHANGEME'
-	-e DAS_URL='https://CHANGEME.styra.com/' \
-	-e DAS_SYSTEM='CHANGEME' \
-	-t styra/entitlements-samples:latest
+ -i \
+ -p 8080:8080 \
+ -p 8123:8123 \
+ -e SAMPLE_APP=entz-playground \
+ -e DOCS_PORT=8080 \
+ -e API_PORT=8123 \
+ -e DAS_TOKEN='CHANGEME'
+ -e DAS_URL='https://CHANGEME.styra.com/' \
+ -e DAS_SYSTEM='CHANGEME' \
+ -t styra/entitlements-samples:latest
 ```
 
 The Entitlements Playground includes a few example requests by default, which
@@ -180,3 +180,9 @@ CLI" installation instructions for your Entitlements system:
 * `curl -LSs -H "Content-Type: application/json" -X POST --data '{"input":{"resource":"/entz-playground/buttons/edit"}}' http://localhost:8181/v1/data/main/main`
 * `curl -LSs -H "Content-Type: application/json" -X POST --data '{"input":{"resource":"/entz-playground/buttons/copy"}}' http://localhost:8181/v1/data/main/main`
 * `curl -LSs -H "Content-Type: application/json" -X POST --data '{"input":{"resource":"/entz-playground/buttons/remove"}}' http://localhost:8181/v1/data/main/main`
+
+## Development
+
+Once you have merged new work in a pull request, to create a new Docker image you just need to
+add a new tag (`git tag ...`) where you bump the latest version by the lowest octet,
+then push that tag to the repo (`git push --tags origin main`).
