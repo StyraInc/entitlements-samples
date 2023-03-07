@@ -162,12 +162,7 @@ export STARTDIR="$TARGET_DIR"
 export INJECT_COMMANDS="alias curl='curl -w \"\\n\"'"
 export WELCOME="/src/entitlements-samples/welcome.txt"
 
-set +u
-if [ ! -z "$TEST" ] ; then
-	sh -c "sleep 2 ; tmux send-keys \"echo 'sleeping 15s to give the server time to spin up...'\" Enter" &
-	sh -c "sleep 15 ; tmux send-keys \"pytest /src/entitlements-samples/tests\" Enter" &
-fi
-set -u
+/src/entitlements-samples/testentry.sh &
 
 if [ "$LAUNCH_OPA" = "YES" ] ; then
 	sh /src/entitlements-samples/splitwatcher.sh /var/log/opa-server.log /var/log/carinfoserver.log

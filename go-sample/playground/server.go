@@ -58,10 +58,10 @@ func GetAPIHandler() http.Handler {
 		tmpl.Execute(w, nil)
 	})
 
-  // serve static assets
-  staticFileDirectory := http.Dir("./assets/")
-  staticFileHandler := http.StripPrefix("/assets/", http.FileServer(staticFileDirectory))
-  router.PathPrefix("/assets/").Handler(staticFileHandler).Methods("GET")
+	// serve static assets
+	staticFileDirectory := http.Dir("./assets/")
+	staticFileHandler := http.StripPrefix("/assets/", http.FileServer(staticFileDirectory))
+	router.PathPrefix("/assets/").Handler(staticFileHandler).Methods("GET")
 
 	router.HandleFunc("/submit", func(w http.ResponseWriter, r *http.Request) {
 		// expects a FormInput object
