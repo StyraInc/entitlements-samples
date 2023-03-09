@@ -8,7 +8,7 @@ if [ ! -z "$TEST" ] ; then
 	MAX_RETRIES=48 # 240s
 	while true ; do
 		if [ "$RETRIES" -gt "$MAX_RETRIES" ] ; then
-			sh -c "sleep2; tmux send-keys \"echo 'exceeded maximum retries waiting for server to become available, tests are likely to fail!'\" Enter" &
+			sh -c "sleep 2; tmux send-keys \"echo 'exceeded maximum retries waiting for server to become available, tests are likely to fail!'\" Enter" &
 			break
 		fi
 
