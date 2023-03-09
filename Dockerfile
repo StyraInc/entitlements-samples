@@ -55,9 +55,10 @@ RUN mkdir -p /src/entitlements-samples/go-sample && \
 COPY carinfostore.yml \
 	welcome.txt \
 	entrypoint.sh \
+	testentry.sh \
 	splitwatcher.sh \
 	data.json \
-	/src/entitlements-samples
+	/src/entitlements-samples/
 COPY python-httpsample/ /src/entitlements-samples/python-httpsample
 COPY go-sample/ /src/entitlements-samples/go-sample
 COPY tests/ /src/entitlements-samples/tests
